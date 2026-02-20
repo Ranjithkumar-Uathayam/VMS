@@ -1,0 +1,180 @@
+<div class="page-content">
+    <div class="space-y-8 w-full">
+
+    <!-- ================= Pending Approval List ================= -->
+    <div class="w-full overflow-hidden">
+        <h3 class="text-xl font-semibold text-gray-800 pb-2 mb-3">
+        Pending Approval ({{ pendingEntries().length }})
+        </h3>
+
+        @if (pendingEntries().length > 0) {
+        <div class="relative group w-full">
+
+            <!-- LEFT ARROW -->
+            <button
+            type="button"
+            class="netflix-arrow left-2"
+            (click)="scrollPending(-1)">
+            ❮
+            </button>
+
+            <!-- SCROLL CONTAINER -->
+            <div
+            #pendingScroll
+            class="netflix-scroll"
+            >
+            @for (entry of pendingEntries(); track entry.EntryId) {
+                <div class="netflix-card">
+                <div
+                    class="card-content"
+                    (click)="selectEntry(entry)"
+                    [class.selected]="selectedEntry()?.EntryId === entry.EntryId"
+                >
+                    <p class="font-bold text-gray-900 text-lg">
+                    {{ entry.DocNum }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                    {{ entry.PartyName }}
+                    </p>
+
+                    <span class="badge mt-2">
+                    {{ entry.Type }}
+                    </span>
+
+                    <div class="mt-4 border-t pt-3">
+                    <p class="text-xs text-gray-500">Total Quantity</p>
+                    <p class="font-semibold text-gray-800">
+                        {{ entry.TotalQuantity }} units
+                    </p>
+                    </div>
+                </div>
+                </div>
+            }
+            </div>
+
+            <!-- RIGHT ARROW -->
+            <button
+            type="button"
+            class="netflix-arrow right-2"
+            (click)="scrollPending(1)">
+            ❯
+            </button>
+
+        </div>
+        } @else {
+        <div class="bg-white p-4 rounded-lg shadow text-center">
+            No entries are pending approval.
+        </div>
+        }
+    </div>
+
+    <!-- ================= Details Section ================= -->
+    <div class="w-full">
+        <div class="bg-white p-6 sm:p-8 rounded-lg shadow-lg w-full details-container">
+
+        @if (selectedEntry(); as entry) {
+            <form (submit)="$event.preventDefault()" class="w-full">
+
+            <!-- Header -->
+            <div class="flex justify-between items-start">
+                <div>
+                <h2 class="text-2xl font-bold text-gray-900">
+                    {{ entry.Type }} - {{ entry.DocNum }}
+                </h2>
+                <p class="text-md text-gray-600">
+                    {{ entry.PartyName }}
+                </p>
+                </div>
+
+                <button type="button" (click)="clearSelection()">
+                ✕
+                </button>
+            </div>
+
+            <!-- Info -->
+            <div class="mt-6 border-t pt-6">
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <dt class="text-sm text-gray-500">Party Code</dt>
+                    <dd class="text-sm font-medium text-gray-900">
+                    {{ entry.PartyCode }}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm text-gray-500">Doc Date</dt>
+                    <dd class="text-sm font-medium text-gray-900">
+                    {{ entry.DocDate }}
+                    </dd>
+                </div>
+                </dl>
+            </div>
+
+                <!-- Items -->
+                <div class="mt-6">
+                    <h4 class="text-md font-medium mb-2">
+                    Items ({{ entry.lineItems.length }})
+                    </h4>
+
+                    <div class="items-scroll">
+                    <div *ngFor="let item of entry.lineItems" class="flex justify-between py-2 border-b text-sm">
+                        <span>{{ item.ItemName }} ({{ item.ItemCode }})</span>
+                        <span class="font-semibold">
+                        {{ item.Quantity }} units
+                        </span>
+                    </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid grid-cols-1 sm:grid-cols-6 gap-x-4 gap-y-6">
+                    <!-- Expected Receive Date -->
+                    <div class="sm:col-span-3">
+                        <label for="expectedReceiveDate" class="block text-sm font-medium text-gray-700"> Expected Receive Date </label>
+                        <input type="date" id="expectedReceiveDate" [value]="expectedReceiveDate()" [min]="today" (input)="handleDateChange($event)" [disabled]="entry.Status !== 'Pending'" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100"/>
+                    </div>
+
+                    <!-- Already Scheduled Info -->
+                    <div class="sm:col-span-3 flex items-end">
+                        <div class="w-full rounded-md bg-blue-50 border border-blue-200 px-4 py-2 text-sm text-blue-800">
+                            Already scheduled: <strong>{{ scheduledTotal() }}</strong> units
+                        </div>
+                    </div>
+
+                    <!-- Warehouse Address -->
+                    <div class="sm:col-span-6">
+                        <label for="warehouseSelect" class="block text-sm font-medium text-gray-700">
+                            Warehouse Address
+                        </label>
+
+                        <select id="warehouseSelect" name="warehouseSelect" [(ngModel)]="selectedWarehouse" [disabled]="entry.Status !== 'Pending'" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100">
+                        <option value="">Select Warehouse</option>
+                        @for (wh of warehouses; track wh.code) {
+                            <option [value]="wh.fullAddress">
+                            {{ wh.name }} ({{ wh.code }}) — {{ wh.fullAddress }}
+                            </option>
+                        }
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-8 flex justify-end">
+                    @if (entry.Status === 'Pending') {
+                    <button type="button" (click)="approveSelectedEntry()" [disabled]="isApproving()" class="approve-btn">
+                        Approve
+                    </button>
+                    }
+                </div>
+
+            </form>
+        } 
+        @else {
+            <div class="text-center py-16 text-gray-500">
+            Select an entry to view details
+            </div>
+        }
+
+        </div>
+    </div>
+
+    </div>
+</div>

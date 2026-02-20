@@ -1,0 +1,102 @@
+/* === SCROLL WRAPPER (VISIBLE AREA) === */
+.dispatch-scroll-wrapper {
+  position: relative;
+  /* width: calc(100vw - 5%); */
+  max-width: calc(100vw - 260px);
+  overflow: hidden;
+}
+
+/* === SCROLL CONTAINER === */
+.dispatch-scroll {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 16px 56px;
+}
+
+.dispatch-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* === CARD === */
+.dispatch-card {
+  flex: 0 0 280px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
+}
+
+/* === ARROWS === */
+.scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.6);
+  color: white;
+  font-size: 22px;
+  z-index: 50;
+}
+
+.scroll-btn.left {
+  left: 8px;
+}
+
+.scroll-btn.right {
+  right: 8px;
+}
+
+/* 🔹 Hidden scanner input (safe + no layout issues) */
+.scanner-input {
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  opacity: 0;
+}
+
+
+/* 🔹 Scan container */
+.scan-box {
+  width: 100%;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  border: 2px dashed #e5e7eb;
+  border-radius: 14px;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* 🔹 Scan button */
+.scan-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  background-color: #4f46e5;
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(79,70,229,.3);
+  transition: all .2s ease;
+}
+
+.scan-btn:hover {
+  background-color: #4338ca;
+  transform: scale(1.05);
+}
+
+/* 🔹 Hint text */
+.scan-hint {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}

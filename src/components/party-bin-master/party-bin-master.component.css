@@ -1,0 +1,403 @@
+/* PAGE */
+.page-container {
+  padding: 20px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.page-header h2 {
+  margin: 0;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 13px;
+}
+
+/* BUTTONS */
+.btn-primary {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: #1e4fd6;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* CARD */
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+/* TABLE */
+.bin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bin-table thead {
+  background: #f8fafc;
+}
+
+.bin-table th,
+.bin-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.bin-id {
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px;
+  color: #888;
+}
+
+/* STATUS BADGES */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.available {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.dispatched {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* MODAL */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: #fff;
+  width: 380px;
+  border-radius: 10px;
+  overflow: hidden;
+  animation: scaleIn 0.15s ease;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 16px;
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #555;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.modal-footer {
+  padding: 14px 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #eee;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.bin-list {
+  list-style: none;
+  padding: 0;
+}
+
+.bin-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+/* TOGGLE BUTTON GROUP */
+.toggle-group {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #334155;
+  transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+  background: #e2e8f0;
+}
+
+.toggle-btn.active {
+  background: #2563eb;        /* PRIMARY COLOR */
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(37,99,235,0.4);
+}
+
+.master-actions {
+  display: flex;
+  justify-content: flex-end; /* right side */
+  margin-bottom: 12px;       /* space before table */
+}
+
+.form-control-modern label {
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Select2 Modern */
+.modern-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 14px;
+}
+
+.select2-display {
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+}
+
+.select2-display .modern-input {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.arrow {
+  margin-left: 8px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.dropdown-modern {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 20;
+}
+
+.dropdown-item {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.dropdown-item:hover {
+  background: #f1f5f9;
+}
+
+.dropdown-item.empty {
+  text-align: center;
+  color: #94a3b8;
+}
+
+/* filters under form */
+.filter-modern {
+  display: flex;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+/* ============================
+   MOBILE RESPONSIVE DESIGN
+============================ */
+@media (max-width: 768px) {
+
+  /* PAGE PADDING */
+  .page-container {
+    padding: 12px;
+  }
+
+  /* HEADER STACK */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .page-header h2 {
+    font-size: 18px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  /* TOGGLE BUTTONS FULL WIDTH */
+  .toggle-group {
+    width: 100%;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    padding: 10px 0;
+    font-size: 14px;
+  }
+
+  /* ACTION BUTTON */
+  .master-actions {
+    justify-content: stretch;
+  }
+
+  .master-actions .btn-primary {
+    width: 100%;
+  }
+
+  /* TABLE RESPONSIVE SCROLL */
+  .card {
+    overflow-x: auto;
+  }
+
+  .bin-table {
+    min-width: 720px; /* allows smooth horizontal scroll */
+  }
+
+  /* FORM GRID → SINGLE COLUMN */
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* INPUTS */
+  .form-group input,
+  .modern-input {
+    font-size: 15px;
+    padding: 12px;
+  }
+
+  /* DROPDOWN */
+  .dropdown-modern {
+    max-height: 180px;
+  }
+
+  /* SCANNED BIN LIST */
+  .bin-list li {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .bin-list button {
+    font-size: 16px;
+  }
+
+  /* ACTION BUTTON (DISPATCH) */
+  button.btn-primary {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  /* MODAL */
+  .modal-card {
+    width: 92%;
+  }
+
+  .bin-table-wrapper {
+    max-height: 60vh;   /* better on small screens */
+  }
+}
+
+/* ============================
+   BIN TABLE VERTICAL SCROLL
+============================ */
+.bin-table-wrapper {
+  max-height: 500px;       /* adjust as needed */
+  overflow-y: auto;
+  overflow-x: auto;        /* keeps mobile horizontal scroll */
+}
+
+/* Keep table header fixed */
+.bin-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  z-index: 2;
+}

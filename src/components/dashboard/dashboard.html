@@ -1,0 +1,238 @@
+<div class="space-y-6">
+
+  <!-- PAGE TITLE -->
+  <h2 class="text-xl font-bold text-gray-800">📊 Dashboard</h2>
+
+  <!-- KPI CARDS -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 text-white p-6 shadow">
+      <p class="text-sm opacity-90">Total Entries</p>
+      <p class="text-3xl font-bold mt-2">{{ totalEntries }}</p>
+    </div>
+
+    <div class="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-6 shadow">
+      <p class="text-sm opacity-90">Total Quantity</p>
+      <p class="text-3xl font-bold mt-2">{{ totalQty }}</p>
+    </div>
+  </div>
+
+    <!-- SEARCH BAR -->
+    <div class="search-bar relative">
+    <!-- Search Icon -->
+    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+        🔍
+    </span>
+
+    <!-- Input -->
+    <input type="text" placeholder="Search by Doc #, Party, Type…" class="search-input pl-10 pr-10" (input)="onSearch($any($event.target).value)" />
+    </div>
+
+  <!-- FILTER BAR -->
+  <div class="bg-white rounded-xl shadow p-4">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+
+      <div>
+        <label class="text-xs font-semibold text-gray-600">From</label>
+        <input type="date" class="w-full mt-1 rounded-lg border-gray-300"
+               [(ngModel)]="filters.fromDate">
+      </div>
+
+      <div>
+        <label class="text-xs font-semibold text-gray-600">To</label>
+        <input type="date" class="w-full mt-1 rounded-lg border-gray-300"
+               [(ngModel)]="filters.toDate">
+      </div>
+
+      <div>
+        <label class="text-xs font-semibold text-gray-600">Doc Type</label>
+        <select class="w-full mt-1 rounded-lg border-gray-300"
+                [(ngModel)]="filters.docType">
+          <option>All</option>
+          <option>JO</option>
+          <option>ST</option>
+          <option>MDC</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-xs font-semibold text-gray-600">Status</label>
+        <select class="w-full mt-1 rounded-lg border-gray-300"
+                [(ngModel)]="filters.status">
+          <option>All</option>
+          <option>Dispatched</option>
+          <option>Received</option>
+          <option>Approved</option>
+        </select>
+      </div>
+
+      <button
+        class="h-10 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition"
+        (click)="load()">
+        🔍 Apply
+      </button>
+
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <!-- <div class="bg-white rounded-xl shadow overflow-hidden">
+    <div class="px-4 py-3 border-b font-semibold text-gray-700">
+      📋 Inward Details
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-gray-600">
+          <tr>
+            <th class="px-4 py-3 text-left">Entry ID</th>
+            <th class="px-4 py-3 text-left">Type</th>
+            <th class="px-4 py-3 text-left">Doc No</th>
+            <th class="px-4 py-3 text-left">Party</th>
+            <th class="px-4 py-3 text-right">Qty</th>
+            <th class="px-4 py-3 text-left">Status</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y">
+          <tr *ngFor="let r of data" class="hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium">{{ r.EntryId }}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-1 rounded-full text-xs bg-gray-200">
+                {{ r.Type }}
+              </span>
+            </td>
+            <td class="px-4 py-3">{{ r.DocNum }}</td>
+            <td class="px-4 py-3 max-w-xs truncate">{{ r.PartyName }}</td>
+            <td class="px-4 py-3 text-right font-semibold">{{ r.TotalQuantity }}</td>
+            <td class="px-4 py-3">
+              <span
+                class="px-3 py-1 rounded-full text-xs font-semibold"
+                [ngClass]="{
+                  'bg-blue-100 text-blue-700': r.Status === 'Dispatched',
+                  'bg-green-100 text-green-700': r.Status === 'Received',
+                  'bg-yellow-100 text-yellow-700': r.Status === 'Approved'
+                }">
+                {{ r.Status }}
+              </span>
+            </td>
+          </tr>
+
+          <tr *ngIf="!data?.length">
+            <td colspan="6" class="text-center py-6 text-gray-400">
+              No records found
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div> -->
+  <!-- TABLE -->
+<div class="bg-white rounded-xl shadow overflow-hidden">
+  <div class="px-4 py-3 border-b font-semibold text-gray-700">
+    📋 Inward Details
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 text-gray-600">
+        <tr>
+          <th class="px-4 py-3 text-left">Entry ID</th>
+          <th class="px-4 py-3 text-left">Type</th>
+          <th class="px-4 py-3 text-left">Doc No</th>
+          <th class="px-4 py-3 text-left">Party</th>
+          <th class="px-4 py-3 text-left">ExpectedReceiveDate</th>
+          <th class="px-4 py-3 text-right">Qty</th>
+          <th class="px-4 py-3 text-left">Status</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y">
+        <tr *ngFor="let r of pagedData" class="hover:bg-gray-50">
+          <td class="px-4 py-3 font-medium">{{ r.EntryId }}</td>
+          <td class="px-4 py-3">{{ r.Type }}</td>
+          <td class="px-4 py-3">{{ r.DocNum }}</td>
+          <td class="px-4 py-3">{{ r.PartyName }}</td>
+          <td class="px-4 py-3">{{ r.ExpectedReceiveDate | date:'dd MMM yyyy'}}</td>
+          <td class="px-4 py-3 text-right font-semibold">
+            {{ r.TotalQuantity }}
+          </td>
+          <td class="px-4 py-3">{{ r.Status }}</td>
+        </tr>
+
+        <tr *ngIf="!pagedData.length">
+          <td colspan="6" class="text-center py-6 text-gray-400">
+            No records found
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINATION -->
+  <div class="flex flex-col md:flex-row justify-between items-center gap-4 p-4 border-t">
+
+    <!-- Page size -->
+    <div class="flex items-center gap-2 text-sm">
+      <span>Rows per page</span>
+      <select
+        class="border rounded px-2 py-1"
+        [(ngModel)]="pageSize"
+        (change)="onPageSizeChange()">
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="20">20</option>
+        <option [value]="50">50</option>
+      </select>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex items-center gap-1">
+      <button
+        class="px-3 py-1 rounded border"
+        [disabled]="page === 1"
+        (click)="changePage(page - 1)">◀</button>
+
+        <button *ngFor="let p of getVisiblePages()" class="px-3 py-1 rounded border" [disabled]="p === '...'" [class.bg-indigo-600]="p === page" [class.text-white]="p === page" (click)="p !== '...' && changePage(p)">
+            {{ p }}
+        </button>
+
+
+      <button
+        class="px-3 py-1 rounded border"
+        [disabled]="page === totalPages"
+        (click)="changePage(page + 1)">▶</button>
+    </div>
+
+  </div>
+</div>
+
+  <!-- CHARTS -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <div class="bg-white rounded-xl shadow p-4">
+      <p class="font-semibold mb-2">📊 Status Wise</p>
+      <div class="h-72">
+        <canvas
+          baseChart
+          [data]="{ labels: pieLabels, datasets: [{ data: pieData, backgroundColor: pieColors }] }"
+          [options]="pieOptions"
+          type="pie">
+        </canvas>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-4">
+      <p class="font-semibold mb-2">📦 Doc Type Quantity</p>
+      <div class="h-72">
+        <canvas
+          baseChart
+          [data]="{ labels: barLabels, datasets: [{ data: barData, backgroundColor: '#4f46e5' }] }"
+          [options]="barOptions"
+          type="bar">
+        </canvas>
+      </div>
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,259 @@
+<div class="bg-white p-6 sm:p-8 rounded-lg shadow-lg">
+  <h2 class="text-2xl font-bold text-gray-900 border-b pb-4 mb-6">Gate Entry Verification</h2>
+  
+  <!-- Main Scan Button -->
+    <input
+    #scanInput
+    type="text"
+    class="scanner-input"
+    autocomplete="off"
+    (keydown.enter)="onScanComplete(scanInput)"
+    />
+
+
+  <div class="text-center mb-8 py-8 bg-gray-50 rounded-lg border-2 border-dashed">
+    <button (click)="startPhysicalScan()" class="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform hover:scale-105">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013.75 9.375v-4.5zM3.75 14.625c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013.75 19.125v-4.5zM13.5 4.875c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 0113.5 9.375v-4.5z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 14.625v4.5a1.875 1.875 0 001.875 1.875h4.5a1.875 1.875 0 001.875-1.875v-4.5a1.875 1.875 0 00-1.875-1.875h-4.5a1.875 1.875 0 00-1.875 1.875z" />
+      </svg>
+      Scan Vehicle QR Code
+    </button>
+    <p class="mt-4 text-sm text-gray-600">Click to activate the camera and scan the QR code from the dispatch slip.</p>
+  </div>
+  
+  <!-- <h3 class="text-lg font-semibold text-gray-700 mb-4">Currently Dispatched Items ({{ dispatchedEntries().length }})</h3>
+
+  @if (dispatchedEntries().length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (entry of dispatchedEntries(); track entry.EntryId) {
+        <div class="w-full text-left p-4 rounded-lg bg-gray-50 border">
+          <div class="flex flex-col h-full">
+            <div class="flex-grow">
+              <p class="font-bold text-gray-800">{{ entry.DocNum }}</p>
+              <p class="text-sm text-gray-600">{{ entry.PartyName }}</p>
+              <span class="mt-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  {{ entry.Type }} - Dispatched
+              </span>
+            </div>
+            <div class="mt-4 border-t pt-3">
+              <p class="text-xs text-gray-500">Total Quantity</p>
+              <p class="font-semibold text-gray-700">{{ entry.TotalQuantity }} units</p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }  -->
+    <h3 class="text-lg font-semibold text-gray-700 mb-4"> Currently Dispatched Items ({{ dispatchedEntries().length }})</h3>
+
+    @if (dispatchedEntries().length > 0) 
+    {
+        <div class="dispatch-scroll-wrapper">
+            <button class="scroll-btn left" (click)="scrollDispatched(-1)">❮</button>
+
+            <div #dispatchedScroll class="dispatch-scroll">
+                @for (entry of dispatchedEntries(); track entry.EntryId) {
+                    <div class="dispatch-card">
+                        <div class="card-content bg-gray-50 border">
+                            <p class="text-sm text-gray-600">
+                                {{ entry.EntryId }}
+                            </p>
+                            <p class="font-bold text-gray-800">
+                                {{ entry.DocNum }}
+                            </p>
+
+                            <p class="text-sm text-gray-600">
+                                {{ entry.PartyName }}
+                            </p>
+
+                            <span class="mt-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                {{ entry.Type }} – Dispatched
+                            </span>
+
+                            <div class="mt-4 border-t pt-3">
+                                <p class="text-xs text-gray-500">Total Quantity</p>
+                                <p class="font-semibold text-gray-700">
+                                    {{ entry.TotalQuantity }} units
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <button class="scroll-btn right" (click)="scrollDispatched(1)">❯</button>
+        </div>
+    }
+    @else 
+    {
+        <div class="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+        <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">All Clear!</h3>
+        <p class="mt-1 text-sm text-gray-500">There are no materials currently dispatched and awaiting gate entry.</p>
+        </div>
+    }
+</div>
+
+<!-- Scanner Modal -->
+@if (isScannerActive()) {
+  <div class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
+       (click)="closeScanner()">
+
+    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full relative animate-fade-in-up"
+         (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="p-4 border-b flex justify-between items-center">
+        <h3 class="text-lg font-bold text-gray-800">
+
+          @if (scannedEntry()) {
+            <span>Entry Details Found</span>
+          } @else {
+            <span>Scan Material QR Code</span>
+          }
+
+        </h3>
+
+        <button (click)="closeScanner()"
+                class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+      </div>
+
+
+      <!-- MAIN VIEW LOGIC -->
+      @if (scannedEntry(); as entry) {
+
+        <!-- Matched Entry Details -->
+        <div class="p-6">
+          <div class="text-center">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="h-16 w-16 mx-auto text-green-500" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h4 class="mt-2 text-xl font-semibold">Match Found!</h4>
+          </div>
+
+          <div class="mt-4 space-y-3 text-sm bg-gray-50 p-4 rounded-lg border">
+            <p class="flex justify-between items-center">
+              <span class="font-semibold text-gray-500">Doc #:</span>
+              <span class="font-mono text-gray-800 p-1 bg-gray-200 rounded">{{ entry.DocNum }}</span>
+            </p>
+
+            <p class="flex justify-between items-center">
+              <span class="font-semibold text-gray-500">Party:</span>
+              <span class="text-gray-800 text-right">{{ entry.PartyName }}</span>
+            </p>
+
+            <p class="flex justify-between items-center">
+              <span class="font-semibold text-gray-500">Total Qty:</span>
+              <span class="font-bold text-gray-800">{{ entry.TotalQuantity }} units</span>
+            </p>
+          </div>
+
+          <!-- Confirmation feedback -->
+          @if (scanResult() && scanResult()?.message !== 'Match Found!') {
+
+            <div class="mt-6 text-center p-4 rounded-lg shadow-inner"
+                 [class]="scanResult()?.type === 'success'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-700'">
+              <p class="font-semibold">{{ scanResult()?.message }}</p>
+            </div>
+
+          }
+
+        </div>
+
+        <!-- Confirm Button -->
+        <div class="p-4 bg-gray-100 border-t">
+          <button (click)="confirmReceipt()"
+                  [disabled]="isConfirming() || isConfirmed()"
+                  class="w-full flex justify-center py-3 px-4 border border-transparent
+                         rounded-md shadow-sm text-base font-medium text-white
+                         bg-green-600 hover:bg-green-700 focus:outline-none
+                         focus:ring-2 focus:ring-offset-2 focus:ring-green-500
+                         disabled:bg-green-400 disabled:cursor-not-allowed">
+
+            @if (isConfirming()) {
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                   xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10"
+                        stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291
+                         A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Confirming...</span>
+            } @else {
+              <span>Confirm Material Receipt</span>
+            }
+
+          </button>
+        </div>
+
+      } @else {
+
+        <!-- SCANNER CAMERA VIEW -->
+        <div class="p-4 relative">
+
+          <video #scannerVideo muted autoplay playsinline
+                 class="w-full rounded-md bg-black aspect-video"></video>
+
+          <canvas #scannerCanvas class="hidden"></canvas>
+
+
+          <!-- Overlay Messages -->
+          <div class="absolute inset-0 flex items-center justify-center p-4">
+
+            @if (scanError()) {
+
+              <div class="text-center p-4 bg-red-100 text-red-700 rounded-lg shadow-lg">
+                <p class="font-bold">Error</p>
+                <p class="text-sm">{{ scanError() }}</p>
+              </div>
+
+            } @else if (scanResult()) {
+
+              <div class="text-center p-6 rounded-lg shadow-lg"
+                  [class]="scanResult()?.type === 'error'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-blue-100 text-blue-700'">
+
+                @if (scanResult()?.type === 'error') {
+                  <svg xmlns="http://www.w3.org/2000/svg"
+                       class="h-12 w-12 mx-auto" fill="none"
+                       viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0
+                             9 9 0 0118 0z" />
+                  </svg>
+                }
+
+                <p class="mt-2 font-semibold">{{ scanResult()?.message }}</p>
+              </div>
+
+            } @else {
+
+              <div class="aspect-square w-4/5 border-4 border-dashed border-white rounded-xl animate-pulse"></div>
+
+            }
+
+          </div>
+
+        </div>
+
+        <!-- Bottom Tip -->
+        <div class="p-4 bg-gray-50 border-t text-sm text-center">
+          <p class="text-gray-600">Position the QR code within the frame.</p>
+        </div>
+
+      }
+
+    </div>
+
+  </div>
+}

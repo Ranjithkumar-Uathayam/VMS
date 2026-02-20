@@ -1,0 +1,186 @@
+<div class="page-container">
+    <!-- HEADER -->
+    <div class="page-header">
+        <div>
+            <h2>Party Bin Management</h2>
+            <p class="subtitle">
+            {{ activeView === 'MASTER'
+                ? 'Manage and create bin ranges'
+                : 'Dispatch bins to party & part'
+            }}
+            </p>
+        </div>
+
+        <div class="toggle-group">
+            <button class="toggle-btn" [class.active]="activeView === 'MASTER'" (click)="switchView('MASTER')">
+                Bin Master
+            </button>
+
+            <button class="toggle-btn" [class.active]="activeView === 'DISPATCH'" (click)="switchView('DISPATCH')">
+                Party Bin Dispatch
+            </button>
+        </div>
+    </div>
+
+    <div *ngIf="activeView === 'MASTER'">
+
+        <!-- ACTION ROW -->
+        <div class="master-actions">
+            <button class="btn-primary" (click)="openAdd()">
+            + Add Bin Range
+            </button>
+        </div>
+
+        <!-- BIN LIST CARD (NEXT LINE) -->
+        <div class="card bin-table-wrapper">
+            <table class="bin-table">
+            <thead>
+                <tr>
+                    <th>Bin ID</th>
+                    <th>Status</th>
+                    <th>PartyName</th>
+                    <th>PartyCode</th>
+                    <th>PartyBinDispatchDate</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr *ngFor="let b of bins">
+                    <td class="bin-id">{{ b.BinID }}</td>
+                    <td>
+                        <span class="status-badge" [class.available]="b.Status === 'AVAILABLE'" [class.dispatched]="b.Status === 'DISPATCHED'">
+                            {{ b.Status }}
+                        </span>
+                    </td>
+                    <td>{{b.PartyName}}</td>
+                    <td>{{b.PartyCode}}</td>
+                    <td>{{b.PartyBinDispatchDate | date:'dd MMM yyyy' }}</td>
+                </tr>
+
+                <tr *ngIf="bins.length === 0">
+                    <td colspan="3" class="empty-state">
+                        No bins created yet
+                    </td>
+                </tr>
+            </tbody>
+            </table>
+        </div>
+
+        </div>
+
+    <div *ngIf="activeView === 'DISPATCH'">
+
+        <!-- DISPATCH FORM -->
+        <div class="card pl-5" style="margin-bottom:20px;">
+            <div class="form-row">
+                <div class="form-control-modern select2-modern doc-select2">
+                    <label>Party Name</label>
+                    @if (isPartyLoading()) {
+                        <div style="margin-top:6px; display:flex; align-items:center; gap:8px;">
+                            <span class="loader"></span>
+                            <span style="font-size:13px;color:#64748b;">
+                                Loading Party details...
+                            </span>
+                        </div>
+                    }
+                    
+                    <div class="select2-display">
+                    <input type="text"
+                            class="modern-input"
+                            placeholder="Search Party Name"
+                            [value]="partySearch"
+                            (input)="onPartySearch($any($event.target).value)"
+                            (focus)="openPartyDropdown = true" />
+                        <span class="arrow">▼</span>
+                    </div>
+
+                    @if (openPartyDropdown) {
+                        <div class="dropdown-modern">
+                            @if (filteredPartyList.length === 0) 
+                            {
+                                <div class="dropdown-item empty">No matches found</div>
+                            } 
+                            @else 
+                            {
+                                @for (list of filteredPartyList; track list.CardName) 
+                                {
+                                    <div class="dropdown-item" (click)="selectPartyName(list)">
+                                        {{list.CardCode}} / {{ list.CardName }}
+                                    </div>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label>Party Code</label>
+                    <input [(ngModel)]="partyCode" placeholder="Party Code">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top:15px;">
+            <label>Scan Bin ID</label>
+            <input
+                [(ngModel)]="scanInput"
+                (keyup.enter)="addScannedBin()"
+                placeholder="Scan and press Enter"
+                style="border:2px solid #2563eb;">
+            </div>
+        </div>
+
+        <!-- SCANNED BINS -->
+        <div class="card pl-3">
+            <h3>Scanned Bins ({{ scannedBins.length }})</h3>
+
+            <div *ngIf="scannedBins.length === 0" class="empty-state">
+            No bins scanned
+            </div>
+
+            <ul class="bin-list">
+            <li *ngFor="let b of scannedBins">
+                {{ b }}
+                <button (click)="removeScannedBin(b)">✕</button>
+            </li>
+            </ul>
+        </div>
+
+        <!-- ACTION -->
+        <div style="text-align:right; margin-top:20px;">
+            <button
+            class="btn-primary"
+            [disabled]="isDispatching"
+            (click)="dispatchBins()">
+            {{ isDispatching ? 'Dispatching...' : 'Dispatch Bins' }}
+            </button>
+        </div>
+
+        </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-backdrop" *ngIf="showAddModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Add Bin Range</h3>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label>From Bin ID</label>
+        <input type="number" [(ngModel)]="fromBin" placeholder="e.g. 1001">
+      </div>
+
+      <div class="form-group">
+        <label>To Bin ID</label>
+        <input type="number" [(ngModel)]="toBin" placeholder="e.g. 1050">
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+      <button class="btn-primary" (click)="submit()">Create</button>
+    </div>
+  </div>
+</div>

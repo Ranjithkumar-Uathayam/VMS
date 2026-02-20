@@ -1,0 +1,223 @@
+<main class="relative min-h-screen w-full bg-slate-100 flex items-center justify-center p-4 overflow-hidden">
+
+  <!-- Background decorative blobs - recolored -->
+  <div class="absolute -top-32 -right-32 w-72 h-72 md:w-96 md:h-96 bg-[#002E5B] rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+  <div class="absolute -bottom-32 -left-32 w-72 h-72 md:w-96 md:h-96 bg-[#F2B319] rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+
+  <div class="relative w-full max-w-4xl mx-auto bg-white bg-opacity-70 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+
+    <!-- Branding / Uathayam Logo Panel -->
+    <div class="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-[#002E5B] to-[#01396D] text-white">
+      <div>
+
+        <!-- Uathayam Logo -->
+        <img src="../../assets/Uathayam_Logo.png" alt="Uathayam Logo" class="w-48 mb-6">
+
+        <p class="text-[#F2B319] font-semibold text-lg tracking-wide">
+          DWP
+        </p>
+
+        <p class="mt-4 text-blue-100 max-w-md leading-relaxed">
+          Streamline your operations from inbound processing with our intuitive Digital Warehouse Platform..
+        </p>
+      </div>
+
+      <div class="mt-8">
+        <p class="font-semibold text-[#F2B319]">
+          B and B Textile
+        </p>
+      </div>
+    </div>
+
+    <!-- Form Side -->
+    <div class="p-8 sm:p-12">
+
+      <div class="text-center mb-4">
+        <h2 class="text-2xl font-bold text-gray-900 sm:text-3xl">
+          Welcome Back
+        </h2>
+        <p class="mt-2 text-sm text-gray-600">
+          Sign in to access your dashboard.
+        </p>
+      </div>
+
+      <!-- Login Type Tabs -->
+      <div class="mt-5">
+        <div class="grid grid-cols-2 gap-2 rounded-lg bg-gray-200 p-1">
+          
+          <!-- Business Tab -->
+          <button
+            (click)="setLoginType('business')"
+            [class]="loginType() === 'business'
+              ? 'bg-[#F2B319] text-[#002E5B] font-semibold shadow'
+              : 'text-gray-600 hover:bg-yellow-100'"
+            class="w-full py-2.5 px-1 rounded-md text-sm transition-all duration-300">
+            Business Login
+          </button>
+
+          <!-- Member Tab -->
+          <button
+            (click)="setLoginType('member')"
+            [class]="loginType() === 'member'
+              ? 'bg-[#F2B319] text-[#002E5B] font-semibold shadow'
+              : 'text-gray-600 hover:bg-yellow-100'"
+            class="w-full py-2.5 px-1 rounded-md text-sm transition-all duration-300">
+            Member Login
+          </button>
+
+        </div>
+      </div>
+
+      <div class="mt-6">
+
+        <!-- ====================== BUSINESS LOGIN ====================== -->
+        @if (loginType() === 'business') {
+
+          <div class="animate-fade-in space-y-6">
+
+            @if (!otpSent()) {
+
+              <!-- Mobile Input Form -->
+              <form class="space-y-6" (submit)="$event.preventDefault(); sendOtp()">
+
+                <div>
+                  <label class="sr-only">Mobile Number</label>
+                  <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                      <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-1.052 1.767l-.933.267c-.41.117-.643.555-.48.93a11.542 11.542 0 006.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 011.767-1.052l3.223.716A1.5 1.5 0 0118 15.352V16.5A1.5 1.5 0 0116.5 18h-1.5A13.5 13.5 0 012 3.5z"/>
+                      </svg>
+                    </div>
+
+                    <input
+                      type="tel"
+                      placeholder="10-digit mobile number"
+                      required
+                      class="block w-full rounded-md border-gray-300 py-3 pl-10 pr-3 shadow-sm
+                             focus:border-[#002E5B] focus:ring-[#002E5B]"
+                      [value]="mobileNumber()"
+                      (input)="handleInput('mobile', $event)">
+                  </div>
+                </div>
+
+                <!-- Send OTP Button -->
+                <button
+                  type="submit"
+                  [disabled]="isLoading()"
+                  class="flex w-full justify-center rounded-md bg-[#002E5B] px-3 py-3 text-sm font-semibold text-white
+                         hover:bg-[#01396D] focus-visible:outline-[#002E5B] disabled:bg-blue-400 disabled:cursor-wait">
+                  @if (isLoading()) {
+                    <span>Sending OTP...</span>
+                  } @else {
+                    <span>Send OTP</span>
+                  }
+                </button>
+
+              </form>
+
+            } @else {
+
+              <!-- OTP Form -->
+              <form class="space-y-6" (submit)="$event.preventDefault(); handleBusinessLogin()">
+
+                <p class="text-sm text-center text-gray-600">
+                  An OTP has been sent to +91 {{ mobileNumber() }}
+                </p>
+
+                <div>
+                  <label class="sr-only">OTP</label>
+                  <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                      <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 8a2 2 0 100-4 2 2 0 000 4z"/>
+                      </svg>
+                    </div>
+
+                    <input
+                      type="tel"
+                      placeholder="4-digit OTP"
+                      required
+                      class="block w-full rounded-md border-gray-300 py-3 pl-10 pr-3 shadow-sm
+                             focus:border-[#002E5B] focus:ring-[#002E5B]"
+                      [value]="otp()"
+                      (input)="handleInput('otp', $event)">
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  [disabled]="isLoading()"
+                  class="flex w-full justify-center rounded-md bg-[#002E5B] px-3 py-3 text-sm font-semibold text-white
+                         hover:bg-[#01396D] focus-visible:outline-[#002E5B] disabled:bg-blue-400 disabled:cursor-wait">
+                  @if (isLoading()) {
+                    <span>Verifying...</span>
+                  } @else {
+                    <span>Sign In</span>
+                  }
+                </button>
+
+              </form>
+
+            }
+
+          </div>
+
+        <!-- ====================== MEMBER LOGIN ====================== -->
+        } @else {
+
+          <form class="animate-fade-in space-y-6" (submit)="$event.preventDefault(); handleMemberLogin()">
+
+            <!-- Username -->
+            <div>
+              <label class="sr-only">Username</label>
+              <div class="relative">
+                <input
+                  type="text"
+                  placeholder="Username"
+                  required
+                  class="block w-full rounded-md border-gray-300 py-3 pl-10 pr-3 shadow-sm
+                         focus:border-[#002E5B] focus:ring-[#002E5B]"
+                  [value]="username()"
+                  (input)="handleInput('username', $event)">
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label class="sr-only">Password</label>
+              <div class="relative">
+                <input
+                  type="password"
+                  placeholder="Password"
+                  required
+                  class="block w-full rounded-md border-gray-300 py-3 pl-10 pr-3 shadow-sm
+                         focus:border-[#002E5B] focus:ring-[#002E5B]"
+                  [value]="password()"
+                  (input)="handleInput('password', $event)">
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              [disabled]="isLoading()"
+              class="flex w-full justify-center rounded-md bg-[#002E5B] px-3 py-3 text-sm font-semibold text-white
+                     hover:bg-[#01396D] focus-visible:outline-[#002E5B] disabled:bg-blue-400 disabled:cursor-wait">
+              @if (isLoading()) { <span>Signing In...</span> }
+              @else { <span>Sign In</span> }
+            </button>
+
+          </form>
+        }
+
+      </div>
+
+      <!-- Error Message -->
+      @if (errorMessage()) {
+        <div class="mt-4 p-3 text-sm text-red-700 bg-red-100 rounded-md animate-fade-in">
+          {{ errorMessage() }}
+        </div>
+      }
+
+    </div>
+  </div>
+</main>

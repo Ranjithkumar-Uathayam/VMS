@@ -1,0 +1,7 @@
+{
+  "name": "Digital Warehouse Platform",
+  "description": "A comprehensive warehouse management application covering vendor entry, warehouse approval, and gate entry processes. It allows vendors to record material details, managers to approve dispatches, and gate personnel to verify incoming materials.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

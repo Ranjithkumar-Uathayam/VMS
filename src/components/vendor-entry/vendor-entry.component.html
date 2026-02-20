@@ -1,0 +1,591 @@
+<div class="vendor-container">
+
+    <!-- ================= HEADER ================= -->
+    <div class="header-modern">
+        <h2 class="page-title">Vendor Material Entry</h2>
+
+        @if (viewMode() === 'list') {
+        <button class="btn-primary-modern" (click)="showFormView()">+ Create Entry</button>
+        } @else {
+        <button class="btn-secondary-modern" (click)="showListView()">← Back</button>
+        }
+    </div>
+
+    <!-- =====================================================
+       LIST VIEW
+  ===================================================== -->
+    @if (viewMode() === 'list') {
+
+    <!-- SEARCH BAR -->
+    <div class="search-bar">
+        <input type="text" placeholder="Search by Doc #, Party, Type…" class="search-input"
+            (input)="onSearch($any($event.target).value)" />
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar-list">
+        <div class="filter-control">
+            <label>Status</label>
+            <select class="filter-input" (change)="onStatusChange($any($event.target).value)">
+                <option value="">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Received">Received</option>
+                <option value="Dispatched">Dispatched</option>
+            </select>
+        </div>
+
+        <div class="filter-control">
+            <label>From</label>
+            <input type="date" class="filter-input" [value]="filterFromDate"
+                (change)="onFromDateChange($any($event.target).value)" />
+        </div>
+
+        <div class="filter-control">
+            <label>To</label>
+            <input type="date" class="filter-input" [value]="filterToDate"
+                (change)="onToDateChange($any($event.target).value)" />
+        </div>
+    </div>
+
+    <!-- DESKTOP TABLE -->
+    <div class="desktop-table-wrapper">
+        <table class="table-modern">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Doc #</th>
+                    <th>Type</th>
+                    <th>Party</th>
+                    <th>Total Qty</th>
+                    <th>ExpectedReceiveDate</th>
+                    <th>WarehouseAddress</th>
+                    <th>Status</th>
+                    <th style="width:120px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (e of paginatedEntries(); track e.id) {
+                <tr>
+                    <td>{{e.EntryId}}</td>
+                    <td>{{ e.DocNum }}</td>
+                    <td>{{ e.Type }}</td>
+                    <td>{{ e.PartyName }}</td>
+                    <td>{{ e.TotalQuantity }}</td>
+                    <td>{{ e.ExpectedReceiveDate | date:'dd-MMM-yyyy'}}</td>
+                    <td>{{ e.WarehouseAddress }}</td>
+                    <td>
+                        <span class="status-pill" [class]="getStatusClasses(e.Status)">
+                            {{ e.Status }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-modern-blue" (click)="viewEntry(e)"> View </button>
+                        @if (e.Status === 'Pending') {
+                        <button class="btn-modern-red" (click)="deleteEntry(e)"> Delete </button>
+                        }
+                        @else if (e.Status === 'Approved') {
+                        <button class="btn-modern-green" (click)="dispatchEntry(e)">Dispatch</button>
+                        }
+                        @else if (e.Status === 'Dispatched') {
+                        <button class="btn-modern-blue" (click)="showQrCodeForEntry(e)">View QR</button>
+                        }
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MOBILE CARD VIEW -->
+    <div class="modern-card-list mobile-only">
+        @for (e of paginatedEntries(); track e.id)
+        {
+        <div class="modern-card">
+            <div class="card-block">
+                <span class="label">Doc Number</span>
+                <span class="value">{{ e.DocNum }}</span>
+            </div>
+
+            <div class="card-block">
+                <span class="label">Type</span>
+                <span class="value tag">{{ e.Type }}</span>
+            </div>
+
+            <div class="card-block">
+                <span class="label">Party</span>
+                <span class="value">{{ e.PartyName }}</span>
+            </div>
+
+            <div class="card-block">
+                <span class="label">Total Qty</span>
+                <span class="value qty">{{ e.TotalQuantity }}</span>
+            </div>
+
+            <div class="card-block">
+                <span class="label">ExpectedReceiveDate</span>
+                <span class="value qty">{{ e.ExpectedReceiveDate | date:'dd-MMM-yyyy'}}</span>
+            </div>
+
+            <div class="card-block">
+                <span class="label">WarehouseAddress</span>
+                <span class="value qty">{{ e.WarehouseAddress }}</span>
+            </div>
+
+            <div class="card-block">
+                <span class="label">Status</span>
+                <span class="value">
+                    <span class="status-pill" [class]="getStatusClasses(e.Status)">
+                        {{ e.Status }}
+                    </span>
+                </span>
+            </div>
+
+            <div class="card-actions">
+                <button class="btn-modern-blue" (click)="viewEntry(e)"> View </button>
+                @if (e.Status === 'Pending') {
+                <button class="btn-modern-red" (click)="deleteEntry(e)"> Delete </button>
+                }
+                @else if (e.Status === 'Approved') {
+                <button class="btn-modern-green" (click)="dispatchEntry(e)">Dispatch</button>
+                }
+                @else if (e.Status === 'Dispatched') {
+                <button class="btn-modern-blue" (click)="showQrCodeForEntry(e)">View QR</button>
+                }
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination-wrapper">
+
+        <!-- PAGE BUTTONS -->
+        <div class="pagination-container">
+            <button class="pg-btn"
+                    [disabled]="currentPage === 1"
+                    (click)="previousPage()">
+            Previous
+            </button>
+
+            @for (p of totalPagesArray(); track p) {
+            <button class="pg-btn"
+                    [class.active]="p === currentPage"
+                    (click)="goToPage(p)">
+                {{ p }}
+            </button>
+            }
+
+            <button class="pg-btn"
+                    [disabled]="currentPage === totalPages"
+                    (click)="nextPage()">
+            Next
+            </button>
+        </div>
+
+        <!-- PAGE INFO + GOTO -->
+        <div class="pagination-extra">
+
+            <span class="page-info">
+            Page <strong>{{ currentPage }}</strong> of <strong>{{ totalPages }}</strong>
+            </span>
+
+            <div class="goto-page">
+            <input type="number"
+                    min="1"
+                    [max]="totalPages"
+                    placeholder="Page #"
+                    class="goto-input"
+                    (input)="goToPageInput = $any($event.target).value"
+                    (keydown.enter)="goToPageByInput()" />
+
+            <button class="pg-btn"
+                    (click)="goToPageByInput()">
+                Go
+            </button>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    } @else {
+
+    <!-- =====================================================
+       FORM VIEW
+  ===================================================== -->
+
+    <div class="form-grid-modern">
+
+        <div class="form-control-modern">
+            <label>Doc Type</label>
+            <select class="modern-input" (change)="onDocTypeChange($any($event.target).value)">
+                <option value="">Select Doc Type</option>
+                <option value="ST">ST</option>
+                <option value="PO">PO</option>
+                <option value="JO">JO</option>
+                <option value="MDC">MDC</option>
+            </select>
+        </div>
+        @if (docType() === 'ST') {
+        <div class="form-control-modern">
+            <label>From Warehouse</label>
+            <select class="modern-input" (change)="onFromWarehouseChange($any($event.target).value)">
+                <option value="">Select From Warehouse</option>
+                @for (w of warehouses; track w.id) {
+                <option [value]="w.code">{{ w.name }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-control-modern">
+            <label>To Warehouse</label>
+            <select class="modern-input" (change)="onToWarehouseChange($any($event.target).value)">
+                <option value="">Select To Warehouse</option>
+                @for (w of warehouses; track w.id) {
+                <option [value]="w.code">{{ w.name }}</option>
+                }
+            </select>
+        </div>
+        }
+
+        <div class="form-control-modern select2-modern doc-select2">
+            <label>Doc Number</label>
+            @if (isDocLoading()) {
+            <div style="margin-top:6px; display:flex; align-items:center; gap:8px;">
+                <span class="loader"></span>
+                <span style="font-size:13px;color:#64748b;">
+                    Loading document details...
+                </span>
+            </div>
+            }
+
+            <div class="select2-display">
+                <input type="text" class="modern-input" placeholder="Search Doc Number" [value]="docSearch"
+                    (input)="onDocSearch($any($event.target).value)" (focus)="openDocDropdown = true" />
+                <span class="arrow">▼</span>
+            </div>
+
+            @if (openDocDropdown) {
+            <div class="dropdown-modern">
+                @if (filteredDocNumbers().length === 0) {
+                <div class="dropdown-item empty">No matches found</div>
+                } @else {
+                @for (num of filteredDocNumbers(); track num) {
+                <div class="dropdown-item" (click)="selectDocNumber(num)">
+                    {{ num }}
+                </div>
+                }
+                }
+            </div>
+            }
+        </div>
+
+        <div class="form-control-modern">
+            <label>Doc Date</label>
+            <input type="date" class="modern-input" [value]="docDate()" (input)="docDate.set($any($event.target).value)"
+                disabled />
+        </div>
+
+        <div class="form-control-modern">
+            <label>Party Code</label>
+            <input class="modern-input" [value]="partyCode()
+               " (input)="onPartyInput($any($event.target).value)" [readonly]="isVendor()" />
+        </div>
+
+        <div class="form-control-modern">
+            <label>Party Name</label>
+            <input class="modern-input" [value]="partyName()" readonly />
+        </div>
+
+        <!-- Supplier DC No - Visible for all -->
+        <div class="form-control-modern">
+            <label>Supplier DC No</label>
+            <input
+                type="text"
+                class="modern-input"
+                [value]="supplierDcNo()"
+                (input)="supplierDcNo.set($any($event.target).value)" />
+        </div>
+
+        <!-- MDC-only fields -->
+        @if (docType() === 'MDC') {
+
+        <div class="form-control-modern">
+            <label>Job Order No</label>
+            <input
+                type="text"
+                class="modern-input"
+                [value]="jobOrderNo()"
+                (input)="jobOrderNo.set($any($event.target).value)" />
+        </div>
+
+        <div class="form-control-modern">
+            <label>Job Order Date</label>
+            <input
+                type="date"
+                class="modern-input"
+                [value]="jobOrderDate()"
+                (input)="jobOrderDate.set($any($event.target).value)" />
+        </div>
+
+        }
+    </div>
+
+    <!-- FORM FILTERS -->
+    <div class="filter-modern">
+        <div class="form-control-modern">
+            <label>Color</label>
+            <select class="modern-input" (change)="filter.color = $any($event.target).value; filteredItems()">
+                <option value="">All</option>
+                @for (c of uniqueColors(); track c) {
+                <option [value]="c">{{ c }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-control-modern">
+            <label>Size</label>
+            <select class="modern-input" (change)="filter.size = $any($event.target).value; filteredItems()">
+                <option value="">All</option>
+                @for (s of uniqueSizes(); track s) {
+                <option [value]="s">{{ s }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-control-modern">
+            <label>Slive</label>
+            <select class="modern-input" (change)="filter.slive = $any($event.target).value; filteredItems()">
+                <option value="">All</option>
+                @for (sl of uniqueSlives(); track sl) {
+                <option [value]="sl">{{ sl }}</option>
+                }
+            </select>
+        </div>
+
+    </div>
+
+    <!-- ============================
+        LINE ITEMS - DESKTOP TABLE
+    ============================= -->
+    <div class="line-items-table-wrapper">
+        <table class="line-items-table">
+            <thead>
+                <tr>
+                    <th>Item Code</th>
+                    <th>Item Name</th>
+                    <th>Qty</th>
+                    <th>Pending</th>
+                    <th>Dispatch Qty</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @for (item of filteredItems(); track item.id) {
+                <tr>
+                    <td>{{ item.itemCode }}</td>
+                    <td>{{ item.itemName }}</td>
+
+                    <td>
+                        <input type="number" class="modern-input" [value]="item.quantity"
+                            (input)="handleLineChange(item.itemCode, 'quantity', $event)" disabled>
+                    </td>
+
+                    <td>{{ item.pendingQty }}</td>
+
+                    <td>
+                        <input type="number" class="modern-input" [value]="item.dispatchQty"
+                            (input)="handleLineChange(item.itemCode, 'dispatchQty', $event)">
+                    </td>
+
+                    <td>
+                        <button class="delete-icon" style="position:static"
+                            (click)="removeLineItem(item.itemCode)">✕</button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ============================
+        LINE ITEMS - MOBILE CARDS
+    ============================= -->
+    <div class="line-items-mobile">
+        <div class="line-items-modern">
+            @for (item of filteredItems(); track item.id; let i = $index) {
+            <div class="modern-item-card">
+                <button class="delete-icon" (click)="removeLineItem(item.itemCode)">✕</button>
+
+                <div class="row-modern">
+                    <label>Item Code</label>
+                    <input class="modern-input" [value]="item.itemCode"
+                        (input)="handleLineChange(item.itemCode, 'itemCode', $event)" />
+                </div>
+
+                <div class="row-modern">
+                    <label>Item Name</label>
+                    <input class="modern-input" [value]="item.itemName"
+                        (input)="handleLineChange(item.itemCode, 'itemName', $event)" />
+                </div>
+
+                <div class="row-modern">
+                    <label>Quantity</label>
+                    <input type="number" class="modern-input" [value]="item.quantity"
+                        (input)="handleLineChange(item.itemCode, 'quantity', $event)" />
+                </div>
+
+                <div class="row-modern">
+                    <label>Pending</label>
+                    <span class="pending-val">{{ item.pendingQty }}</span>
+                </div>
+
+                <div class="row-modern">
+                    <label>Dispatch Qty</label>
+                    <input type="number" class="modern-input" [value]="item.dispatchQty"
+                        (input)="handleLineChange(item.itemCode, 'dispatchQty', $event)" />
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- SUBMIT BAR -->
+    <div class="submit-bar-modern">
+        <div class="total-container-modern">
+            <label>Total Qty</label>
+            <input class="modern-input total-display" [value]="totalQuantity()" readonly />
+        </div>
+
+        <div class="total-container-modern">
+            <label>No Of Boxes </label>
+            <input class="modern-input" [value]="NoOfBox" (input)="updateNoOfBox($event)" />
+        </div>
+
+        <button class="btn-primary-modern submit-btn" (click)="submitEntry()" [disabled]="isLoading()">
+            Submit Entry
+        </button>
+    </div>
+
+    }
+    <!-- END FORM VIEW -->
+
+    <!-- =====================================================
+       QR CODE MODAL
+  ===================================================== -->
+    @if (qrCodeData(); as entry) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center" (click)="closeQrModal()">
+
+        <div id="qr-code-modal-content" class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center"
+            (click)="$event.stopPropagation()">
+
+            <h3 class="text-xl font-bold text-gray-800">Gate Entry Pass </h3>
+            <p class="text-sm text-gray-600 mt-1">Present this at the gate for verification.</p>
+
+            <div class="my-6 p-2 border rounded-lg inline-block bg-white">
+                @if (qrCodeImageUrl()) {
+                <img [src]="qrCodeImageUrl()" class="h-48 w-48" />
+                } @else if (qrCodeError()) {
+                <div class="h-48 w-48 flex items-center justify-center text-red-600">
+                    {{ qrCodeError() }}
+                </div>
+                } @else {
+                <div class="h-48 w-48 flex items-center justify-center text-gray-500">
+                    Generating...
+                </div>
+                }
+            </div>
+
+            <div class="text-left space-y-2 text-sm">
+                <p><strong>Doc #:</strong> {{ entry.DocNum }}</p>
+                <p><strong>Party:</strong> {{ entry.PartyName }}</p>
+                <p><strong>Total Qty:</strong> {{ entry.TotalQuantity }}</p>
+                <p><strong>ExpectedReceiveDate </strong> {{ entry.ExpectedReceiveDate | date:'dd-MMM-yyyy' }}</p>
+                <p><strong>WarehouseAddress </strong> {{ entry.WarehouseAddress }}</p>
+            </div>
+
+            <div class="mt-6 flex items-center justify-center gap-4">
+                @if (!qrCodeError()) {
+                <button (click)="printQrCode()" class="btn-modern-green w-full">
+                    Print
+                </button>
+                } @else {
+                <button (click)="retryQrCodeGeneration()" class="btn-modern-blue w-full">
+                    Retry
+                </button>
+                }
+
+                <button class="btn-secondary-modern w-full" (click)="closeQrModal()">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+    }
+
+    @if (selectedViewEntry(); as entry) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center" (click)="closeViewModal()">
+
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-4xl w-full view-modal" (click)="$event.stopPropagation()">
+            <div id="print-entry-content">
+                <h3 class="text-xl font-bold mb-4">
+                    Item Details – {{ entry.DocNum }}
+                </h3>
+
+                <div class="view-modal-body">
+                    <!-- HEADER INFO -->
+                    <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+                        <p><strong>Party:</strong> {{ entry.PartyName }}</p>
+                        <p><strong>Status:</strong> {{ entry.Status }}</p>
+                        <p><strong>Total Qty:</strong> {{ entry.TotalQuantity }}</p>
+                        <p><strong>Expected Date:</strong> {{ entry.ExpectedReceiveDate | date:'dd-MMM-yyyy' }}</p>
+                        <p><strong>Warehouse:</strong> {{ entry.WarehouseAddress }}</p>
+                    </div>
+
+                    <!-- ITEMS TABLE -->
+                    <table class="line-items-table">
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Item Color</th>
+                                <th>Item Size</th>
+                                <th>Item Slive</th>
+                                <th>Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of viewItems(); track item.id) {
+                            <tr>
+                                <td>{{ item.ItemCode }}</td>
+                                <td>{{ item.ItemName }}</td>
+                                <td>{{ item.ItemColor }}</td>
+                                <td>{{ item.ItemSize }}</td>
+                                <td>{{ item.ItemSlive }}</td>
+                                <td>{{ item.Quantity }}</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="mt-6 flex justify-end">
+                        <button class="btn-modern-blue mr-3" (click)="printViewEntry()">
+                            Print
+                        </button>
+
+                        <button class="btn-secondary-modern" (click)="closeViewModal()">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    }
+
+</div>

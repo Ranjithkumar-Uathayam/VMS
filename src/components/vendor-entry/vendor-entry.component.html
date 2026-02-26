@@ -61,6 +61,7 @@
                     <th>ExpectedReceiveDate</th>
                     <th>WarehouseAddress</th>
                     <th>Status</th>
+                    <th>SupplierDcNo</th>
                     <th style="width:120px;">Actions</th>
                 </tr>
             </thead>
@@ -79,6 +80,7 @@
                             {{ e.Status }}
                         </span>
                     </td>
+                    <td>{{ e.SupplierDcNo }}</td>
                     <td>
                         <button class="btn-modern-blue" (click)="viewEntry(e)"> View </button>
                         @if (e.Status === 'Pending') {

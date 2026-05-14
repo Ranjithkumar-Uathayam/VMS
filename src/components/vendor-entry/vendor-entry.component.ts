@@ -136,11 +136,15 @@ export class VendorEntryComponent {
             if (!list || !user) return;
 
             let filtered;
-
             if (user.role === 'admin') {
                 filtered = list;
             }
-            else {
+            else if (user.name == 'BandR')
+            {
+                filtered = list.filter(e => e.PartyCode === 'V05521')
+            }
+            else 
+            {
                 filtered = list.filter(e => e.PartyCode === user.partyCode);
             }
 
@@ -237,7 +241,15 @@ export class VendorEntryComponent {
 
         if (this.isVendor()) {
             const u = this.currentUser();
-            this.partyCode.set(u?.partyCode || '');
+            if (u?.name == 'BandR')
+            {
+                this.partyCode.set('V05521')
+            }
+            else
+            {
+                this.partyCode.set(u?.partyCode || '');
+            }
+            
             this.partyName.set(u?.name || '');
 
             if (this.docType() === 'JO') {

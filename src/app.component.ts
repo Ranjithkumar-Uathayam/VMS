@@ -35,42 +35,22 @@ export class AppComponent {
   canSeePartyBinMaster = computed(() => this.hasRole(['admin', 'inventory']));
 
   constructor() {
-    // Effect to set the default view when user logs in/out
     effect(() => {
         const user = this.currentUser();
-        if(user?.role == 'vendor')
-        {
-            this.activeView = signal<View>('vendor');
-        }
-        else if(user?.role == 'inventory')
-        {
-            this.activeView = signal<View>('partyBinMaster');
-        }
-        else
-        {
-            this.activeView = signal<View>('dashBoard');
-        }
+        if (!user) return;
 
-        if (user) 
-        {
-            // Set initial view based on role priority
-            if (this.canSeeVendor()) {
-                this.setView('vendor');
-            } 
-            else if (this.canSeeWarehouse()) {
-                this.setView('warehouse');
-            } 
-            else if (this.canSeeGate()) {
-                this.setView('gate');
-            }
-            else if(this.canSeeDashBoard()){
-                this.setView('dashBoard')
-            }
-            else if(this.canSeePartyBinMaster()){
-                this.setView('partyBinMaster')
-            }
+        if (this.canSeeVendor()) {
+            this.setView('vendor');
+        } else if (this.canSeeWarehouse()) {
+            this.setView('warehouse');
+        } else if (this.canSeeGate()) {
+            this.setView('gate');
+        } else if (this.canSeeDashBoard()) {
+            this.setView('dashBoard');
+        } else if (this.canSeePartyBinMaster()) {
+            this.setView('partyBinMaster');
         }
-    });
+    }, { allowSignalWrites: true });
   }
 
   private hasRole(roles: UserRole[]): boolean {

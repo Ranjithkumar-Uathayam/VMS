@@ -143,7 +143,7 @@ export class VendorEntryComponent {
             {
                 filtered = list.filter(e => e.PartyCode === 'V05521')
             }
-            else 
+            else
             {
                 filtered = list.filter(e => e.PartyCode === user.partyCode);
             }
@@ -152,13 +152,13 @@ export class VendorEntryComponent {
                 this.filteredList.set(filtered);
                 this.updatePagination();
             }
-        });
+        }, { allowSignalWrites: true });
 
         // re-run filters AFTER entries sync (safe)
         effect(() => {
             this.entries();
             queueMicrotask(() => this.applySearchDate());
-        });
+        }, { allowSignalWrites: true });
     }
 
     ngOnInit() {

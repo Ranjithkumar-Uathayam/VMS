@@ -15,6 +15,7 @@ export class MaterialEntryService {
   entries = signal<any[]>([]);
   dispatchedEntries = signal<any[]>([]);
   pendingApprovalEntries = signal<any[]>([]);
+  isEntriesLoading = signal(true);
 
   constructor(private http: HttpClient) { this.loadInitialData(); }
 
@@ -35,7 +36,9 @@ export class MaterialEntryService {
       this.filterPendingApprovals();
 
     } catch (err) {
-      throw err
+      throw err;
+    } finally {
+      this.isEntriesLoading.set(false);
     }
   }
 

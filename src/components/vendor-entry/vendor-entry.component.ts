@@ -31,6 +31,7 @@ export class VendorEntryComponent {
     entries = this.api.entries;
 
     isLoading = signal(false);
+    isListLoading = this.api.isEntriesLoading;
 
     // auth
     currentUser = this.auth.currentUser;
@@ -121,6 +122,12 @@ export class VendorEntryComponent {
 
     fromWarehouse = '';
     toWarehouse = '';
+    fromWarehouseSearch = '';
+    toWarehouseSearch = '';
+    openFromWarehouseDropdown = false;
+    openToWarehouseDropdown = false;
+    filteredFromWarehouses = signal<any[]>([]);
+    filteredToWarehouses = signal<any[]>([]);
 
     warehouses: any[] = [];
 
@@ -189,6 +196,8 @@ export class VendorEntryComponent {
                     name: w.WhsName,
                     fullAddress: `${w.WhsName || ''} ${w.Street || ''} ${w.StreetNo || ''}, ${w.City || ''}, ${w.State || ''}, ${w.ZipCode || ''}`.trim()
                 }));
+                this.filteredFromWarehouses.set(this.warehouses);
+                this.filteredToWarehouses.set(this.warehouses);
             }
         });
     }
@@ -227,6 +236,14 @@ export class VendorEntryComponent {
         this.filteredDocNumbers.set([]);
         this.docSearch = '';
         this.openDocDropdown = false;
+        this.fromWarehouse = '';
+        this.toWarehouse = '';
+        this.fromWarehouseSearch = '';
+        this.toWarehouseSearch = '';
+        this.openFromWarehouseDropdown = false;
+        this.openToWarehouseDropdown = false;
+        this.filteredFromWarehouses.set(this.warehouses);
+        this.filteredToWarehouses.set(this.warehouses);
 
         this.filter = { color: '', size: '', slive: '' };
     }
@@ -346,6 +363,12 @@ export class VendorEntryComponent {
             const target = event.target as HTMLElement;
             if (!target.closest('.doc-select2')) {
                 this.openDocDropdown = false;
+            }
+            if (!target.closest('.from-whs-select2')) {
+                this.openFromWarehouseDropdown = false;
+            }
+            if (!target.closest('.to-whs-select2')) {
+                this.openToWarehouseDropdown = false;
             }
         });
     }
@@ -844,6 +867,35 @@ export class VendorEntryComponent {
     closeViewModal() {
         this.selectedViewEntry.set(null);
         this.viewItems.set([]);
+    }
+
+    onFromWarehouseSearch(term: string) {
+        this.fromWarehouseSearch = term;
+        const s = term.toLowerCase();
+        this.filteredFromWarehouses.set(
+            this.warehouses.filter(w => w.name.toLowerCase().includes(s) || w.code.toLowerCase().includes(s))
+        );
+    }
+
+    selectFromWarehouse(w: any) {
+        this.fromWarehouse = w.code;
+        this.fromWarehouseSearch = w.name;
+        this.openFromWarehouseDropdown = false;
+    }
+
+    onToWarehouseSearch(term: string) {
+        this.toWarehouseSearch = term;
+        const s = term.toLowerCase();
+        this.filteredToWarehouses.set(
+            this.warehouses.filter(w => w.name.toLowerCase().includes(s) || w.code.toLowerCase().includes(s))
+        );
+    }
+
+    selectToWarehouse(w: any) {
+        this.toWarehouse = w.code;
+        this.toWarehouseSearch = w.name;
+        this.openToWarehouseDropdown = false;
+        this.loadDocumentsForParty();
     }
 
     onFromWarehouseChange(value: string) {

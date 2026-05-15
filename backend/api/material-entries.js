@@ -390,7 +390,7 @@ router.get('/warehouses', async (req, res) => {
             t0.ZipCode,
             t0.[State] 
         FROM [BBLive].[dbo].owhs as t0 
-        where t0.GlblLocNum=1 and t0.Inactive='N'
+        where t0.Inactive='N'
     `);
     res.json({ status: true, data: result.recordset });
 

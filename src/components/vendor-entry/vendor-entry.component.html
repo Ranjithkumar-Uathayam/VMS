@@ -48,6 +48,16 @@
         </div>
     </div>
 
+    <!-- LIST LOADER -->
+    @if (isListLoading()) {
+    <div class="list-loader">
+        <span class="list-spinner"></span>
+        <span class="list-loader-text">Loading entries...</span>
+    </div>
+    }
+
+    @if (!isListLoading()) {
+
     <!-- DESKTOP TABLE -->
     <div class="desktop-table-wrapper">
         <table class="table-modern">
@@ -211,6 +221,7 @@
 
     </div>
 
+    }
 
     } @else {
 
@@ -231,24 +242,52 @@
             </select>
         </div>
         @if (docType() === 'ST') {
-        <div class="form-control-modern">
+        <div class="form-control-modern select2-modern from-whs-select2">
             <label>From Warehouse</label>
-            <select class="modern-input" (change)="onFromWarehouseChange($any($event.target).value)">
-                <option value="">Select From Warehouse</option>
-                @for (w of warehouses; track w.id) {
-                <option [value]="w.code">{{ w.name }}</option>
+            <div class="select2-display">
+                <input type="text" class="modern-input" placeholder="Search From Warehouse"
+                    [value]="fromWarehouseSearch"
+                    (input)="onFromWarehouseSearch($any($event.target).value)"
+                    (focus)="openFromWarehouseDropdown = true" />
+                <span class="arrow">▼</span>
+            </div>
+            @if (openFromWarehouseDropdown) {
+            <div class="dropdown-modern">
+                @if (filteredFromWarehouses().length === 0) {
+                <div class="dropdown-item empty">No matches found</div>
+                } @else {
+                @for (w of filteredFromWarehouses(); track w.code) {
+                <div class="dropdown-item" (click)="selectFromWarehouse(w)">
+                    <strong>{{ w.code }}</strong> — {{ w.name }}
+                </div>
                 }
-            </select>
+                }
+            </div>
+            }
         </div>
 
-        <div class="form-control-modern">
+        <div class="form-control-modern select2-modern to-whs-select2">
             <label>To Warehouse</label>
-            <select class="modern-input" (change)="onToWarehouseChange($any($event.target).value)">
-                <option value="">Select To Warehouse</option>
-                @for (w of warehouses; track w.id) {
-                <option [value]="w.code">{{ w.name }}</option>
+            <div class="select2-display">
+                <input type="text" class="modern-input" placeholder="Search To Warehouse"
+                    [value]="toWarehouseSearch"
+                    (input)="onToWarehouseSearch($any($event.target).value)"
+                    (focus)="openToWarehouseDropdown = true" />
+                <span class="arrow">▼</span>
+            </div>
+            @if (openToWarehouseDropdown) {
+            <div class="dropdown-modern">
+                @if (filteredToWarehouses().length === 0) {
+                <div class="dropdown-item empty">No matches found</div>
+                } @else {
+                @for (w of filteredToWarehouses(); track w.code) {
+                <div class="dropdown-item" (click)="selectToWarehouse(w)">
+                    <strong>{{ w.code }}</strong> — {{ w.name }}
+                </div>
                 }
-            </select>
+                }
+            </div>
+            }
         </div>
         }
 
@@ -256,7 +295,7 @@
             <label>Doc Number</label>
             @if (isDocLoading()) {
             <div style="margin-top:6px; display:flex; align-items:center; gap:8px;">
-                <span class="loader"></span>
+                <span class="loader loader-dark"></span>
                 <span style="font-size:13px;color:#64748b;">
                     Loading document details...
                 </span>
@@ -468,7 +507,12 @@
         </div>
 
         <button class="btn-primary-modern submit-btn" (click)="submitEntry()" [disabled]="isLoading()">
+            @if (isLoading()) {
+            <span class="loader"></span>
+            Submitting...
+            } @else {
             Submit Entry
+            }
         </button>
     </div>
 

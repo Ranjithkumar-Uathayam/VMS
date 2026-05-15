@@ -668,31 +668,7 @@ export class VendorEntryComponent {
 
     onSearch(term: string) {
         this.searchTerm = term.toLowerCase();
-        this.applySearch();
-    }
-
-    applySearch() {
-        const term = this.searchTerm;
-
-        const list = this.entries().filter((e: any) =>
-            e.DocNum.toLowerCase().includes(term) ||
-            e.Type.toLowerCase().includes(term) ||
-            e.PartyName.toLowerCase().includes(term)
-        );
-
-        const user = this.currentUser();
-        if (!list || !user) return;
-        let filtered;
-        if ((user.role === 'admin') || (user.role === 'inventory'))
-        {
-            filtered = list;
-        }
-        else {
-            filtered = list.filter(e => e.PartyCode === user.partyCode);
-        }
-
-        this.filteredList.set(filtered);
-        this.updatePagination();
+        this.applySearchDate();
     }
 
     updatePagination() {
@@ -805,11 +781,11 @@ export class VendorEntryComponent {
         const user = this.currentUser();
         if (!list || !user) return;
         let filtered;
-        if ((user.role === 'admin') || (user.role === 'inventory')) 
-        {
+        if ((user.role === 'admin') || (user.role === 'inventory')) {
             filtered = list;
-        }
-        else {
+        } else if (user.name === 'BandR') {
+            filtered = list.filter(e => e.PartyCode === 'V05521');
+        } else {
             filtered = list.filter(e => e.PartyCode === user.partyCode);
         }
 

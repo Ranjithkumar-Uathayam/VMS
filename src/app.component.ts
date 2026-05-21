@@ -28,7 +28,7 @@ export class AppComponent {
   isSidebarOpen = signal(false);
 
   // Role-based access control signals
-  canSeeVendor = computed(() => this.hasRole(['admin', 'vendor']));
+  canSeeVendor = computed(() => this.hasRole(['admin', 'vendor', 'inventory']));
   canSeeWarehouse = computed(() => this.hasRole(['admin', 'manager']));
   canSeeGate = computed(() => this.hasRole(['admin', 'manager', 'watchman']));
   canSeeDashBoard = computed(() => this.hasRole(['admin', 'manager', 'watchman']));

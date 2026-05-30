@@ -3,8 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const materialEntriesRouter = require('./api/material-entries');
 const authRouter = require('./api/auth');
-const partyBin = require('./api/partyBinMaster')
+const partyBin = require('./api/partyBinMaster');
+const grnPushing = require('./api/grnPushing');
 const db = require('./db');
+const { getWmsPool } = require('./db-wms');
 
 const app = express();
 const port = process.env.API_PORT || 3001;
@@ -15,15 +17,15 @@ app.use(express.json());
 app.use('/api/auth', authRouter);
 app.use('/api/material-transactions', materialEntriesRouter);
 app.use('/api/partyBin', partyBin);
+app.use('/api/ERP', grnPushing);
 
-// Start the server and then attempt to connect to the database.
-// This makes the server more resilient to database connection issues on startup.
+// Start the server and then attempt to connect to both databases.
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
-    
-    // Connect to the database
+
+    // Primary DB (WMS_Uathayam)
     db.connect().then(() => {
-        console.log('Database connection established successfully.');
+        console.log('Database connection established successfully (WMS_Uathayam).');
     }).catch(err => {
         console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
         console.log('!!! CRITICAL: FAILED TO CONNECT TO DATABASE !!!');
@@ -31,5 +33,12 @@ app.listen(port, () => {
         console.log('!!! connection is restored. Check .env      !!!');
         console.log(`!!! Error: ${err.message}`);
         console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+    });
+
+    // Secondary DB (WMS @ 10.0.10.203) — used by GRN Pushing endpoints
+    getWmsPool().catch(err => {
+        console.log('!!! WARNING: WMS2 DB connection failed (10.0.10.203/WMS) !!!');
+        console.log(`!!! Error: ${err.message}`);
+        console.log('!!! GRN Pushing endpoints will not work until resolved  !!!');
     });
 });

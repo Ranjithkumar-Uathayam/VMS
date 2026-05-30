@@ -7,9 +7,10 @@ import { LoginComponent } from './components/login/login.component';
 import { AuthService } from './services/auth.service';
 import { UserRole } from './models/user.model';
 import { DashboardComponent } from './components/dashboard/dashboard';
-import { PartyBinMasterComponent } from './components/party-bin-master/party-bin-master.component'
+import { PartyBinMasterComponent } from './components/party-bin-master/party-bin-master.component';
+import { GrnPushingComponent } from './components/grn-pushing/grn-pushing.component';
 
-type View = 'dashBoard' | 'vendor' | 'warehouse' | 'gate' | 'partyBinMaster';
+type View = 'dashBoard' | 'vendor' | 'warehouse' | 'gate' | 'partyBinMaster' | 'grnPushing';
 
 @Component({
   selector: 'app-root',
@@ -18,7 +19,7 @@ type View = 'dashBoard' | 'vendor' | 'warehouse' | 'gate' | 'partyBinMaster';
   styleUrl: './app.component.css',
   // FIX: Corrected typo from `Change.DetectionStrategy` to `ChangeDetectionStrategy`.
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, LoginComponent, VendorEntryComponent, WarehouseApprovalComponent, GateEntryComponent, DashboardComponent, PartyBinMasterComponent]
+  imports: [CommonModule, LoginComponent, VendorEntryComponent, WarehouseApprovalComponent, GateEntryComponent, DashboardComponent, PartyBinMasterComponent, GrnPushingComponent]
 })
 export class AppComponent {
   authService = inject(AuthService);
@@ -33,6 +34,7 @@ export class AppComponent {
   canSeeGate = computed(() => this.hasRole(['admin', 'manager', 'watchman']));
   canSeeDashBoard = computed(() => this.hasRole(['admin', 'manager', 'watchman']));
   canSeePartyBinMaster = computed(() => this.hasRole(['admin', 'inventory']));
+  canSeeGrnPushing = computed(() => this.hasRole(['admin', 'inventory']));
 
   constructor() {
     effect(() => {

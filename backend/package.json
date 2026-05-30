@@ -4,18 +4,19 @@
   "description": "Backend for Digital Warehouse Platform",
   "main": "server.js",
   "bin": "server.js",
-    "pkg": {
-        "assets": [
-            "api/**/*",
-            "node_modules/**/*",
-            "sql/**/*",
-            "/**/*"
-        ]
-    },
+  "pkg": {
+    "assets": [
+      "api/**/*",
+      "node_modules/**/*",
+      "sql/**/*",
+      "/**/*"
+    ]
+  },
   "scripts": {
     "start": "nodemon server.js"
   },
   "dependencies": {
+    "axios": "^1.16.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",

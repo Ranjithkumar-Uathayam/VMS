@@ -1,4 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
+import {
+    ChangeDetectionStrategy, ChangeDetectorRef,
+    Component, computed, inject, signal, OnInit
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GrnPushingService } from '../../services/grn-pushing.service';
 import { AuthService } from '../../services/auth.service';
@@ -17,31 +20,36 @@ export class GrnPushingComponent implements OnInit {
 
     private api  = inject(GrnPushingService);
     private auth = inject(AuthService);
+    private cdr  = inject(ChangeDetectorRef);   // explicit CD control for OnPush + async
 
     currentUser = this.auth.currentUser;
 
-    // ── list ────────────────────────────────────────────────────────────
+    // ── list ─────────────────────────────────────────────────────────────
     grnList       = this.api.grnList;
     isListLoading = this.api.isListLoading;
 
-    // ── detail ──────────────────────────────────────────────────────────
+    // ── detail ───────────────────────────────────────────────────────────
     selectedGrn     = signal<any | null>(null);
     detailRows      = signal<any[]>([]);
     isDetailLoading = signal(false);
     detailError     = signal<string | null>(null);
 
-    // ── push ────────────────────────────────────────────────────────────
+    // ── push ─────────────────────────────────────────────────────────────
     isPushing  = signal(false);
     pushResult = signal<{ status: number; message: string } | null>(null);
 
-    // ── search / filter ─────────────────────────────────────────────────
+    // ── search / filter ──────────────────────────────────────────────────
     searchTerm = signal('');
 
-    // ── pagination (signals so OnPush sees every change) ─────────────────
+    // ── pagination ───────────────────────────────────────────────────────
     readonly pageSize = 10;
     currentPage = signal(1);
 
-    // ── derived / computed ───────────────────────────────────────────────
+    // Request-ID pattern: each new API call gets a higher ID.
+    // When the response arrives we check whether it's still the latest call.
+    private _detailReqId = 0;
+
+    // ── computed ─────────────────────────────────────────────────────────
     filteredList = computed(() => {
         const term = this.searchTerm().toLowerCase().trim();
         const list = this.grnList();
@@ -78,12 +86,12 @@ export class GrnPushingComponent implements OnInit {
         this.detailRows().reduce((s, r) => s + Number(r.Binned    || 0), 0)
     );
 
-    // ── lifecycle ────────────────────────────────────────────────────────
+    // ── lifecycle ─────────────────────────────────────────────────────────
     ngOnInit(): void {
         this.loadList();
     }
 
-    // ── list actions ─────────────────────────────────────────────────────
+    // ── list actions ──────────────────────────────────────────────────────
     async loadList(): Promise<void> {
         try {
             await this.api.fetchGrnList();
@@ -91,6 +99,7 @@ export class GrnPushingComponent implements OnInit {
             Swal.fire({ icon: 'error', title: 'Load Failed',
                 text: err?.message || 'Could not fetch GRN list' });
         }
+        this.cdr.markForCheck();
     }
 
     onSearch(term: string): void {
@@ -102,46 +111,71 @@ export class GrnPushingComponent implements OnInit {
     nextPage():     void { this.currentPage.update(p => Math.min(this.totalPages(), p + 1)); }
     goToPage(p: number): void { this.currentPage.set(p); }
 
-    // ── GRN selection ────────────────────────────────────────────────────
+    // ── GRN selection ─────────────────────────────────────────────────────
     async selectGrn(row: any): Promise<void> {
         const docEntry = row.DocEntry ?? row.docEntry;
         if (!docEntry) return;
-        if (this.isDetailLoading()) return;  // debounce rapid clicks
 
-        this.selectedGrn.set(row);
+        // ── FIX 1: No isDetailLoading guard ──────────────────────────────
+        // Any click immediately starts a fresh load. The request-ID pattern
+        // below discards responses from superseded calls.
+        const reqId = ++this._detailReqId;
+
+        // ── FIX 2: Always spread to a NEW object ─────────────────────────
+        // Signal equality is by reference. If the user clicks the same row
+        // again, `row` is the same reference → signal won't fire → view won't
+        // update. Spreading creates a new object every time.
+        this.selectedGrn.set({ ...row });
         this.detailRows.set([]);
         this.detailError.set(null);
         this.pushResult.set(null);
         this.isDetailLoading.set(true);
 
+        // ── FIX 3: markForCheck so OnPush re-renders immediately ──────────
+        this.cdr.markForCheck();
+
         try {
             const process = row.Type || row.type || row.Process || 'GRPO';
             const res: any = await this.api.fetchGrnDetails(docEntry, 'Binning', process, 'Pending');
 
+            // Discard stale response if user already clicked a newer row
+            if (reqId !== this._detailReqId) return;
+
             if (res?.status === 1) {
                 const rows = (res.data || []).map((r: any) => this.normaliseDetailRow(r));
                 this.detailRows.set(rows);
-                if (rows.length === 0) {
-                    this.detailError.set('No GRN Details Found for this document.');
-                }
+                this.detailError.set(
+                    rows.length === 0 ? 'No GRN Details Found for this document.' : null
+                );
             } else {
+                this.detailRows.set([]);
                 this.detailError.set(res?.message || 'No GRN Details found.');
             }
         } catch (err: any) {
+            if (reqId !== this._detailReqId) return;
+            this.detailRows.set([]);
             this.detailError.set(err?.message || 'Failed to load GRN details. Please try again.');
         } finally {
-            this.isDetailLoading.set(false);
+            // Only reset loading for the latest request
+            if (reqId === this._detailReqId) {
+                this.isDetailLoading.set(false);
+            }
+            this.cdr.markForCheck();   // force re-render after async completes
         }
     }
 
     async retryDetail(): Promise<void> {
         const grn = this.selectedGrn();
-        if (grn) await this.selectGrn(grn);
+        if (grn) {
+            // Re-select using the stored row — spread ensures a new object reference
+            await this.selectGrn({ ...grn });
+        }
     }
 
-    // Normalise detail rows — handles both PascalCase and camelCase column names
+    // Normalise detail rows — ...r FIRST so explicit keys override raw nulls
     private normaliseDetailRow(r: any): any {
         return {
+            ...r,
             LineNo:    r.LineNo    ?? r.lineNo    ?? r.LINENO      ?? null,
             ItemCode:  r.ItemCode  ?? r.itemCode  ?? r.ITEMCODE    ?? r.ProductCode  ?? r.productCode  ?? '',
             ItemName:  r.ItemName  ?? r.itemName  ?? r.ITEMNAME    ?? r.ProductName  ?? r.productName  ?? '',
@@ -151,11 +185,10 @@ export class GrnPushingComponent implements OnInit {
             DocType:   r.DocType   ?? r.docType   ?? '',
             DocNum:    r.DocNum    ?? r.docNum    ?? '',
             DocEntry:  r.DocEntry  ?? r.docEntry  ?? null,
-            ...r
         };
     }
 
-    // ── push ────────────────────────────────────────────────────────────
+    // ── push ──────────────────────────────────────────────────────────────
     async pushGrn(): Promise<void> {
         const grn = this.selectedGrn();
         if (!grn || this.detailRows().length === 0) return;
@@ -167,10 +200,10 @@ export class GrnPushingComponent implements OnInit {
         const { isConfirmed } = await Swal.fire({
             icon: 'question',
             title: 'Push GRN to ERP?',
-            html: `<b>Doc#:</b> ${docNum}<br><b>Party:</b> ${partyName}<br><b>Entry:</b> ${docEntry}`,
-            showCancelButton: true,
-            confirmButtonText: 'Yes, Push',
-            cancelButtonText:  'Cancel',
+            html:  `<b>Doc#:</b> ${docNum}<br><b>Party:</b> ${partyName}<br><b>Entry:</b> ${docEntry}`,
+            showCancelButton:   true,
+            confirmButtonText:  'Yes, Push',
+            cancelButtonText:   'Cancel',
             confirmButtonColor: '#4f46e5'
         });
         if (!isConfirmed) return;
@@ -201,15 +234,18 @@ export class GrnPushingComponent implements OnInit {
             this.pushResult.set({ status: 0, message: err?.message || 'An unexpected error occurred' });
         } finally {
             this.isPushing.set(false);
+            this.cdr.markForCheck();
         }
     }
 
-    // ── helpers ──────────────────────────────────────────────────────────
+    // ── helpers ───────────────────────────────────────────────────────────
     clearSelection(): void {
+        this._detailReqId++;          // invalidate any in-flight detail request
         this.selectedGrn.set(null);
         this.detailRows.set([]);
         this.detailError.set(null);
         this.pushResult.set(null);
+        this.isDetailLoading.set(false);
     }
 
     refresh(): void {
@@ -221,14 +257,19 @@ export class GrnPushingComponent implements OnInit {
 
     getStatusClass(status: string): string {
         const s = (status || '').toLowerCase();
-        if (s === 'pending')                                   return 'grn-status--pending';
+        if (s === 'pending')                                      return 'grn-status--pending';
         if (s === 'completed' || s === 'success' || s === 'done') return 'grn-status--success';
-        if (s === 'failed'    || s === 'error')                return 'grn-status--error';
-        if (s === 'initiated')                                 return 'grn-status--initiated';
+        if (s === 'failed'    || s === 'error')                   return 'grn-status--error';
+        if (s === 'initiated')                                    return 'grn-status--initiated';
         return 'grn-status--default';
     }
 
     rowStatus(row: any): string {
         return row.Status || row.status || row.DocStatus || '';
+    }
+
+    // Used in template comparisons — ensures numeric vs string DocEntry never mismatches
+    str(v: any): string {
+        return v == null ? '' : String(v);
     }
 }

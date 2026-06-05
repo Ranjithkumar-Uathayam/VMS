@@ -150,11 +150,6 @@ router.post('/getGRNPushingDetails', async (req, res) => {
     }
 });
 
-/* ------------------------------------------------------------------ */
-/*  3. CREATE GRN PUSHING TRANSACTION                                  */
-/*     POST /api/ERP/createGRNPushingTransaction                       */
-/*     Body: { docEntry, type?, process?, status?, userId?, userName? }*/
-/* ------------------------------------------------------------------ */
 router.post('/createGRNPushingTransaction', async (req, res) => {
     const pool2      = await getWmsPool();
     const transaction = new sql.Transaction(pool2);

@@ -234,11 +234,11 @@
         <div class="form-control-modern">
             <label>Doc Type</label>
             <select class="modern-input" (change)="onDocTypeChange($any($event.target).value)">
-                <option value="">Select Doc Type</option>
-                <option value="ST">ST</option>
-                <option value="PO">PO</option>
-                <option value="JO">JO</option>
-                <option value="MDC">MDC</option>
+                <option value=""    [selected]="!docType()">Select Doc Type</option>
+                <option value="ST"  [selected]="docType() === 'ST'">ST</option>
+                <option value="PO"  [selected]="docType() === 'PO'">PO</option>
+                <option value="JO"  [selected]="docType() === 'JO'">JO</option>
+                <option value="MDC" [selected]="docType() === 'MDC'">MDC</option>
             </select>
         </div>
         @if (docType() === 'ST') {

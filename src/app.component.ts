@@ -9,8 +9,10 @@ import { UserRole } from './models/user.model';
 import { DashboardComponent } from './components/dashboard/dashboard';
 import { PartyBinMasterComponent } from './components/party-bin-master/party-bin-master.component';
 import { GrnPushingComponent } from './components/grn-pushing/grn-pushing.component';
+import { JoStatusComponent } from './components/jo-status/jo-status.component';
+import { JoVendorNavigationService } from './services/jo-vendor-navigation.service';
 
-type View = 'dashBoard' | 'vendor' | 'warehouse' | 'gate' | 'partyBinMaster' | 'grnPushing';
+type View = 'dashBoard' | 'vendor' | 'warehouse' | 'gate' | 'partyBinMaster' | 'grnPushing' | 'joStatus';
 
 @Component({
   selector: 'app-root',
@@ -19,11 +21,12 @@ type View = 'dashBoard' | 'vendor' | 'warehouse' | 'gate' | 'partyBinMaster' | '
   styleUrl: './app.component.css',
   // FIX: Corrected typo from `Change.DetectionStrategy` to `ChangeDetectionStrategy`.
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, LoginComponent, VendorEntryComponent, WarehouseApprovalComponent, GateEntryComponent, DashboardComponent, PartyBinMasterComponent, GrnPushingComponent]
+  imports: [CommonModule, LoginComponent, VendorEntryComponent, WarehouseApprovalComponent, GateEntryComponent, DashboardComponent, PartyBinMasterComponent, GrnPushingComponent, JoStatusComponent]
 })
 export class AppComponent {
-  authService = inject(AuthService);
-  
+  authService   = inject(AuthService);
+  joVendorNav   = inject(JoVendorNavigationService);
+
   currentUser = this.authService.currentUser;
   activeView = signal<View>('dashBoard');
   isSidebarOpen = signal(false);
@@ -35,8 +38,10 @@ export class AppComponent {
   canSeeDashBoard = computed(() => this.hasRole(['admin', 'manager', 'watchman']));
   canSeePartyBinMaster = computed(() => this.hasRole(['admin', 'inventory']));
   canSeeGrnPushing = computed(() => this.hasRole(['admin', 'inventory']));
+  canSeeJoStatus   = computed(() => this.hasRole(['admin', 'vendor', 'inventory']));
 
   constructor() {
+    // Set default view on login
     effect(() => {
         const user = this.currentUser();
         if (!user) return;
@@ -52,6 +57,12 @@ export class AppComponent {
         } else if (this.canSeePartyBinMaster()) {
             this.setView('partyBinMaster');
         }
+    }, { allowSignalWrites: true });
+
+    // Navigate to Vendor Entry when JO Status requests it
+    effect(() => {
+        const req = this.joVendorNav.navigationRequested();
+        if (req > 0) this.setView('vendor');
     }, { allowSignalWrites: true });
   }
 

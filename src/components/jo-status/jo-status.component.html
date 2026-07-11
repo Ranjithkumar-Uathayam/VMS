@@ -1,0 +1,1175 @@
+<div class="jo-container">
+
+    <!-- ═══════════════════════ PAGE HEADER ═══════════════════════ -->
+    <div class="jo-page-header">
+        <div class="jo-header-left">
+            <div class="jo-header-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                </svg>
+            </div>
+            <div>
+                <h2 class="jo-page-title">JO Status Tracking</h2>
+                <p class="jo-page-subtitle">Document-linked production stage entry</p>
+            </div>
+        </div>
+        <div class="jo-header-actions">
+            <button class="btn-new-jo" (click)="toggleEntryForm()">
+                @if (showEntryForm()) {
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    Cancel
+                } @else {
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                    New Entry
+                }
+            </button>
+            <button class="jo-refresh-btn" (click)="refresh()" [disabled]="isListLoading()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" [class.spinning]="isListLoading()">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════ NEW ENTRY FORM ═══════════════════════ -->
+    @if (showEntryForm()) {
+    <div class="entry-card">
+
+        <div class="entry-card-header">
+            <div class="entry-card-header-left">
+                <div class="entry-header-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm2 10a1 1 0 10-2 0v3a1 1 0 102 0v-3zm2-3a1 1 0 011 1v5a1 1 0 11-2 0v-5a1 1 0 011-1zm4-1a1 1 0 10-2 0v7a1 1 0 102 0V8z" clip-rule="evenodd"/></svg>
+                </div>
+                <div>
+                    <h3 class="entry-card-title">New JO Status Entry</h3>
+                    <p class="entry-card-sub">Select a document and enter Stage 1 fabric quantity</p>
+                </div>
+            </div>
+            <button class="btn-close" (click)="toggleEntryForm()" title="Close">✕</button>
+        </div>
+
+        <!-- Step Indicator -->
+        <div class="entry-steps">
+            <div class="entry-step" [class.entry-step--done]="isVendor() || entryVendorCode()">
+                <div class="entry-step-circle">
+                    @if (isVendor() || entryVendorCode()) {
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    } @else { 1 }
+                </div>
+                <span>Vendor</span>
+            </div>
+            <div class="entry-step-line" [class.entry-step-line--done]="!!selectedDocType()"></div>
+            <div class="entry-step" [class.entry-step--done]="!!selectedDocType()">
+                <div class="entry-step-circle">
+                    @if (selectedDocType()) {
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    } @else { 2 }
+                </div>
+                <span>Doc Type</span>
+            </div>
+            <div class="entry-step-line" [class.entry-step-line--done]="!!selectedDocNum()"></div>
+            <div class="entry-step" [class.entry-step--done]="!!selectedDocNum()">
+                <div class="entry-step-circle">
+                    @if (selectedDocNum()) {
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    } @else { 3 }
+                </div>
+                <span>Doc Number</span>
+            </div>
+            <div class="entry-step-line" [class.entry-step-line--done]="entryStageForm().fabricPreparation > 0"></div>
+            <div class="entry-step" [class.entry-step--done]="entryStageForm().fabricPreparation > 0">
+                <div class="entry-step-circle">
+                    @if (entryStageForm().fabricPreparation > 0) {
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    } @else { 4 }
+                </div>
+                <span>Fabric Qty</span>
+            </div>
+        </div>
+
+        <div class="entry-body">
+
+            <!-- ─── SECTION 1: Vendor + Doc Type + Load ─── -->
+            <div class="entry-section">
+                <div class="entry-section-label">
+                    <span class="entry-section-num" style="background:#6366f1">1</span>
+                    <span>Vendor &amp; Document Selection</span>
+                </div>
+
+                <div class="entry-row-flex">
+                    @if (isVendor()) {
+                    <div class="vendor-auto-block">
+                        <div class="vendor-auto-avatar">
+                            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+                        </div>
+                        <div class="vendor-auto-info">
+                            <div class="vendor-auto-lbl">Your Vendor Account</div>
+                            <div class="vendor-auto-val">
+                                <span class="jo-vendor-code-tag">{{ currentUser()?.partyCode }}</span>
+                                <span>{{ currentUser()?.name }}</span>
+                            </div>
+                        </div>
+                        <div class="vendor-auto-check">
+                            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        </div>
+                    </div>
+                    } @else {
+                    <div class="entry-vendor-fields">
+                        <div class="jo-field-group">
+                            <label class="jo-field-label">Vendor Code *</label>
+                            <input class="jo-field-input" type="text" placeholder="e.g. V001"
+                                [value]="entryVendorCode()"
+                                (input)="entryVendorCode.set($any($event.target).value)" />
+                        </div>
+                        <div class="jo-field-group jo-field-group--wide">
+                            <label class="jo-field-label">Vendor Name</label>
+                            <input class="jo-field-input" type="text" placeholder="Vendor / Manufacturer name"
+                                [value]="entryVendorName()"
+                                (input)="entryVendorName.set($any($event.target).value)" />
+                        </div>
+                    </div>
+                    }
+
+                    <div class="jo-field-group">
+                        <label class="jo-field-label">Document Type *</label>
+                        <div class="doc-type-pills">
+                            @for (dt of docTypeList; track dt) {
+                            <button class="doc-type-pill"
+                                [class.doc-type-pill--active]="selectedDocType() === dt"
+                                (click)="selectDocType(dt)">{{ dt }}</button>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="load-btn-wrap">
+                        <button class="btn-load-docs"
+                            [disabled]="!selectedDocType() || isFetchingDocs()"
+                            (click)="loadDocuments()">
+                            @if (isFetchingDocs()) {
+                                <span class="jo-spinner jo-spinner--xs jo-spinner--white"></span>
+                                Loading…
+                            } @else {
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                </svg>
+                                Load Documents
+                            }
+                        </button>
+                    </div>
+                </div>
+
+                @if (fetchDocsError()) {
+                <div class="entry-msg entry-msg--error">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                    {{ fetchDocsError() }}
+                </div>
+                }
+            </div>
+
+            <!-- ─── SECTION 2: Document Number ─── -->
+            @if (docNumList().length > 0) {
+            <div class="entry-section entry-section--animated">
+                <div class="entry-section-label">
+                    <span class="entry-section-num" style="background:#0891b2">2</span>
+                    <span>Select Document Number</span>
+                    <span class="entry-badge">{{ docNumList().length }} found</span>
+                    @if (selectedDocNum()) {
+                    <span class="entry-doc-chip">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        {{ selectedDocNum() }}
+                    </span>
+                    }
+                </div>
+
+                <div class="doc-num-search-wrap">
+                    <svg class="doc-num-search-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                    </svg>
+                    <input class="doc-num-search-input" type="text" placeholder="Search document number…"
+                        [value]="docNumSearch()"
+                        (input)="docNumSearch.set($any($event.target).value)" />
+                    @if (docNumSearch()) {
+                    <button class="doc-num-search-clear" (click)="docNumSearch.set('')" title="Clear">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <span class="doc-num-search-count">{{ filteredDocNumList().length }} match{{ filteredDocNumList().length === 1 ? '' : 'es' }}</span>
+                    }
+                </div>
+
+                @if (filteredDocNumList().length > 0) {
+                <div class="doc-num-grid">
+                    @for (dn of filteredDocNumList(); track dn) {
+                    <button class="doc-num-btn"
+                        [class.doc-num-btn--active]="selectedDocNum() === dn"
+                        (click)="selectDocNum(dn)">
+                        <span class="doc-num-icon">
+                            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/></svg>
+                        </span>
+                        <span class="doc-num-text">{{ dn }}</span>
+                        @if (selectedDocNum() === dn) {
+                        <span class="doc-num-check-icon">
+                            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </span>
+                        }
+                    </button>
+                    }
+                </div>
+                } @else {
+                <div class="doc-num-no-results">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+                    No documents match "<b>{{ docNumSearch() }}</b>"
+                </div>
+                }
+            </div>
+            }
+
+            <!-- ─── SECTION 3: Group Summary ─── -->
+            @if (selectedDocNum() && groupSummary().length > 0) {
+            <div class="entry-section entry-section--animated">
+                <div class="entry-section-label">
+                    <span class="entry-section-num" style="background:#7c3aed">3</span>
+                    <span>Pending Quantity by Group</span>
+                    <span class="entry-doc-chip">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/></svg>
+                        {{ selectedDocType() }} – {{ selectedDocNum() }}
+                    </span>
+                </div>
+
+                <div class="group-summary-row">
+                    @for (g of groupSummary(); track g.name; let idx = $index) {
+                    <div class="group-card" [style.--gc]="stageColors[idx % 6]">
+                        <div class="group-card-stripe"></div>
+                        <div class="group-card-body">
+                            <div class="group-card-name">{{ g.name }}</div>
+                            <div class="group-card-qty">{{ g.qty }}</div>
+                            <div class="group-card-lbl">Pending Qty</div>
+                        </div>
+                    </div>
+                    }
+                    <div class="group-card group-card--total">
+                        <div class="group-card-stripe" style="background:#0f172a"></div>
+                        <div class="group-card-body">
+                            <div class="group-card-name">Grand Total</div>
+                            <div class="group-card-qty group-card-qty--total">{{ totalPendingQty() }}</div>
+                            <div class="group-card-lbl">All Groups</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+
+            <!-- ─── SECTION 3b: Line Item Detail Grid ─── -->
+            @if (entryLineGrid(); as egrid) {
+            <div class="entry-section entry-section--animated">
+                <div class="entry-section-label">
+                    <span class="entry-section-num" style="background:#0f766e">
+                        <svg viewBox="0 0 20 20" fill="currentColor" style="width:12px;height:12px">
+                            <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z"/>
+                        </svg>
+                    </span>
+                    <span>Pending Order Detail</span>
+                    <span class="entry-badge">{{ egrid.rows.length }} colours</span>
+                    <span class="entry-badge" style="background:#dcfce7;color:#15803d">{{ egrid.grandTotal }} pcs total</span>
+                </div>
+                <ng-container [ngTemplateOutlet]="lineGridTpl" [ngTemplateOutletContext]="{grid: egrid}"></ng-container>
+            </div>
+            }
+
+            <!-- ─── SECTION 4: Stage 1 (Fabric Preparation) Entry ─── -->
+            @if (selectedDocNum()) {
+            <div class="entry-section entry-section--animated">
+                <div class="entry-section-label">
+                    <span class="entry-section-num" style="background:#3B82F6">4</span>
+                    <span>Fabric Preparation Qty</span>
+                    @if (totalPendingQty() > 0) {
+                    <div class="entry-prog-wrap">
+                        <div class="entry-prog-bar">
+                            <div class="entry-prog-fill"
+                                [style.width.%]="entryProgressPct()"
+                                [class.entry-prog-fill--over]="entryIsOverQty()"></div>
+                        </div>
+                        <span class="entry-prog-txt" [class.text-danger]="entryIsOverQty()">
+                            {{ entryStageForm().fabricPreparation }} / {{ totalPendingQty() }}
+                        </span>
+                    </div>
+                    }
+                </div>
+
+                <div class="entry-stage1-wrap">
+                    <!-- Stage 1 input card -->
+                    <div class="entry-s1-card">
+                        <div class="entry-s1-head">
+                            <span class="entry-s1-badge" style="background:#3B82F6">1</span>
+                            <span class="entry-s1-label">Fabric Preparation</span>
+                            <span class="entry-s1-tag">Stage 1 – Total Qty</span>
+                        </div>
+                        <div class="entry-s1-input-row">
+                            <input
+                                type="number"
+                                class="stage-input-field"
+                                [class.stage-input-field--error]="entryIsOverQty()"
+                                min="0"
+                                [value]="entryStageForm().fabricPreparation || ''"
+                                (input)="updateEntryFabricQty($any($event.target).value)"
+                                placeholder="0" />
+                            <span class="stage-input-unit">pcs</span>
+                        </div>
+                        <div class="stage-mini-bar">
+                            <div class="stage-mini-fill"
+                                [style.width.%]="stageBarPct('fabricPreparation')"
+                                style="background:#3B82F6">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info note about stages 2–6 -->
+                    <div class="entry-stages-note">
+                        <div class="entry-stages-note-icon">
+                            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/></svg>
+                        </div>
+                        <div>
+                            <div class="entry-stages-note-title">Stages 2–6 tracked line-wise after creation</div>
+                            <div class="entry-stages-note-desc">
+                                Once this entry is created, stages 2–6 are tracked with
+                                <b>production line</b> and <b>time-wise</b> entries for accurate reporting.
+                            </div>
+                            <div class="entry-stages-note-pills">
+                                @for (s of lineStages; track s.key; let i = $index) {
+                                <span class="entry-stages-note-pill"
+                                    [style.background]="stageColors[i + 1] + '1a'"
+                                    [style.color]="stageColors[i + 1]"
+                                    [style.border-color]="stageColors[i + 1] + '55'">
+                                    {{ i + 2 }}. {{ s.short }}
+                                </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (entryIsOverQty()) {
+                <div class="jo-validation-error" style="margin-top:12px;">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+                    Fabric qty ({{ entryStageForm().fabricPreparation }}) exceeds pending qty ({{ totalPendingQty() }}).
+                </div>
+                }
+
+                <div class="jo-remarks-wrap" style="margin-top:12px; padding-bottom:0;">
+                    <label class="jo-remarks-label">Remarks <span style="color:#94a3b8">(optional)</span></label>
+                    <textarea class="jo-remarks-input" rows="2"
+                        placeholder="Any notes for this entry…"
+                        [value]="entryRemarks()"
+                        (input)="entryRemarks.set($any($event.target).value)">
+                    </textarea>
+                </div>
+            </div>
+            }
+
+            <!-- Result banner -->
+            @if (createResult()) {
+            <div class="jo-result-banner"
+                [class.banner--ok]="createResult()!.status === 1"
+                [class.banner--err]="createResult()!.status !== 1">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                    @if (createResult()!.status === 1) {
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/>
+                    } @else {
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/>
+                    }
+                </svg>
+                <span>{{ createResult()!.message }}</span>
+            </div>
+            }
+
+            <div class="entry-form-footer">
+                <div class="entry-footer-info">
+                    @if (selectedDocNum() && totalPendingQty() > 0) {
+                        @if (entryIsOverQty()) {
+                        <span class="text-danger">Over by {{ entryStageForm().fabricPreparation - totalPendingQty() }} units — reduce quantity</span>
+                        } @else if (entryStageForm().fabricPreparation > 0) {
+                        <span style="color:#059669; font-weight:600;">{{ entryStageForm().fabricPreparation }} pcs ready for Fabric Preparation stage</span>
+                        } @else {
+                        <span class="text-muted">Enter fabric preparation quantity (optional at creation)</span>
+                        }
+                    } @else if (!selectedDocNum()) {
+                    <span class="text-muted">Select a document number to continue</span>
+                    }
+                </div>
+                <div class="jo-entry-footer-btns">
+                    <button class="btn-cancel-entry" (click)="toggleEntryForm()">Cancel</button>
+                    <button class="btn-save-entry"
+                        [disabled]="!entryCanSave()"
+                        (click)="createJoEntry()">
+                        @if (isCreating()) {
+                            <span class="jo-spinner jo-spinner--xs jo-spinner--white"></span>
+                            Saving…
+                        } @else {
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z"/>
+                                <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z"/>
+                            </svg>
+                            Create Entry
+                        }
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    }
+
+    <!-- ═══════════════════════ STATS BAR ═══════════════════════ -->
+    <div class="jo-stats-bar">
+        <div class="jo-stat-card">
+            <span class="jo-stat-num">{{ joList().length }}</span>
+            <span class="jo-stat-lbl">Total JOs</span>
+        </div>
+        <div class="jo-stat-card jo-stat-card--blue">
+            <span class="jo-stat-num">{{ filteredList().length }}</span>
+            <span class="jo-stat-lbl">Showing</span>
+        </div>
+        @if (selectedJo()) {
+        <div class="jo-stat-card jo-stat-card--purple">
+            <span class="jo-stat-num">{{ selectedJo().OrderQty }}</span>
+            <span class="jo-stat-lbl">Order Qty</span>
+        </div>
+        <div class="jo-stat-card"
+             [class.jo-stat-card--green]="!isOverQty()"
+             [class.jo-stat-card--red]="isOverQty()">
+            <span class="jo-stat-num">{{ totalStageQty() }}</span>
+            <span class="jo-stat-lbl">Stage Total</span>
+        </div>
+        }
+    </div>
+
+    <!-- ═══════════════════════ JO LIST CARD ═══════════════════════ -->
+    <div class="jo-card-section">
+
+        <div class="jo-card-header">
+            <div class="jo-card-header-left">
+                <div class="jo-card-header-dot jo-dot--indigo"></div>
+                <h3 class="jo-card-title">Job Orders</h3>
+                <span class="jo-count-badge">{{ filteredList().length }}</span>
+            </div>
+            <div class="jo-card-header-right">
+                <div class="jo-search-wrap">
+                    <svg class="jo-search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0015.803 15.803z" />
+                    </svg>
+                    <input type="text" class="jo-search-input"
+                        placeholder="Search by doc number, vendor…"
+                        [value]="searchTerm()"
+                        (input)="onSearch($any($event.target).value)" />
+                </div>
+            </div>
+        </div>
+
+        @if (isListLoading()) {
+        <div class="jo-loader-row">
+            <div class="jo-spinner"></div>
+            <span>Loading job orders…</span>
+        </div>
+        }
+
+        @if (!isListLoading() && filteredList().length === 0) {
+        <div class="jo-empty-row">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
+            </svg>
+            <span>{{ searchTerm() ? 'No matching records' : 'No entries yet. Click "New Entry" to create one.' }}</span>
+        </div>
+        }
+
+        @if (!isListLoading() && filteredList().length > 0) {
+        <div class="jo-table-scroll">
+            <table class="jo-table">
+                <thead>
+                    <tr>
+                        <th class="td-num">#</th>
+                        <th>Document</th>
+                        <th>Vendor</th>
+                        <th class="td-qty">Order Qty</th>
+                        <th class="td-qty">Stage Total</th>
+                        <th class="td-progress">Progress</th>
+                        <th class="td-date">Last Updated</th>
+                        <th class="td-action"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of paginatedList(); track row.Id; let i = $index) {
+                    <tr [class.tr-selected]="str(selectedJo()?.Id) === str(row.Id)" (click)="selectJo(row)">
+                        <td class="td-num">{{ (currentPage() - 1) * pageSize + i + 1 }}</td>
+                        <td>
+                            <div style="display:flex; flex-direction:column; gap:3px;">
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    @if (row.DocType) {
+                                    <span class="doc-type-chip">{{ row.DocType }}</span>
+                                    }
+                                    <span class="jo-no-pill">{{ row.JO_No }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display:flex; flex-direction:column; gap:2px;">
+                                <span>{{ row.VendorName || '—' }}</span>
+                                @if (row.VendorCode) {
+                                <span class="jo-vendor-code-tag">{{ row.VendorCode }}</span>
+                                }
+                            </div>
+                        </td>
+                        <td class="td-qty"><span class="qty-pill">{{ row.OrderQty }}</span></td>
+                        <td class="td-qty">
+                            <span class="qty-pill"
+                                [class.qty-pill--green]="row.TotalStageQty > 0 && row.TotalStageQty <= row.OrderQty"
+                                [class.qty-pill--muted]="!row.TotalStageQty">
+                                {{ row.TotalStageQty || 0 }}
+                            </span>
+                        </td>
+                        <td class="td-progress">
+                            <div class="mini-progress-wrap">
+                                <div class="mini-progress-bar">
+                                    <div class="mini-progress-fill" [style.width.%]="rowProgress(row)"></div>
+                                </div>
+                                <span class="mini-progress-pct">{{ rowProgress(row) }}%</span>
+                            </div>
+                        </td>
+                        <td class="td-date">{{ row.UpdatedAt ? (row.UpdatedAt | date:'dd-MMM-yy HH:mm') : '—' }}</td>
+                        <td class="td-action">
+                            <div class="td-action-wrap">
+                                <button class="btn-view"
+                                    [class.btn-view--active]="str(selectedJo()?.Id) === str(row.Id)"
+                                    (click)="selectJo(row); $event.stopPropagation()">
+                                    @if (str(selectedJo()?.Id) === str(row.Id)) { ✓ Selected } @else { Update }
+                                </button>
+                                <button class="btn-del-jo" title="Delete this JO"
+                                    [disabled]="isDeletingJoId() === row.Id"
+                                    (click)="confirmDeleteJo(row, $event)">
+                                    @if (isDeletingJoId() === row.Id) {
+                                    <span class="jo-spinner jo-spinner--xs"></span>
+                                    } @else {
+                                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                    }
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="jo-mobile-list">
+            @for (row of paginatedList(); track row.Id) {
+            <div class="jo-m-card" [class.jo-m-card--active]="str(selectedJo()?.Id) === str(row.Id)" (click)="selectJo(row)">
+                <div class="jo-m-card-top">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        @if (row.DocType) { <span class="doc-type-chip">{{ row.DocType }}</span> }
+                        <span class="jo-no-pill">{{ row.JO_No }}</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span class="qty-pill">{{ row.OrderQty }}</span>
+                        <button class="btn-del-jo btn-del-jo--sm" title="Delete" (click)="confirmDeleteJo(row, $event)">
+                            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="jo-m-card-mid">
+                    <span>{{ row.VendorName || '—' }}</span>
+                    @if (row.VendorCode) { <span class="jo-vendor-code-tag">{{ row.VendorCode }}</span> }
+                </div>
+                <div class="jo-m-card-bot">
+                    <div class="mini-progress-wrap" style="flex:1">
+                        <div class="mini-progress-bar">
+                            <div class="mini-progress-fill" [style.width.%]="rowProgress(row)"></div>
+                        </div>
+                        <span class="mini-progress-pct">{{ row.TotalStageQty || 0 }} / {{ row.OrderQty }}</span>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+
+        @if (totalPages() > 1) {
+        <div class="jo-pagination">
+            <button class="pg-btn" [disabled]="currentPage() === 1" (click)="previousPage()">← Prev</button>
+            @for (p of totalPagesArray(); track p) {
+                @if (totalPages() <= 7 || p === 1 || p === totalPages() || (p >= currentPage() - 1 && p <= currentPage() + 1)) {
+                <button class="pg-btn" [class.pg-btn--on]="p === currentPage()" (click)="goToPage(p)">{{ p }}</button>
+                }
+            }
+            <button class="pg-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()">Next →</button>
+        </div>
+        }
+        }
+
+    </div>
+
+    <!-- ═══════════════════════ STAGE STATUS DETAIL ═══════════════════════ -->
+    @if (selectedJo()) {
+    <div class="jo-detail-section">
+
+        <div class="jo-card-header">
+            <div class="jo-card-header-left">
+                <div class="jo-card-header-dot jo-dot--green"></div>
+                <h3 class="jo-card-title">Stage Status Update</h3>
+                @if (selectedJo().DocType) {
+                <span class="doc-type-chip">{{ selectedJo().DocType }}</span>
+                }
+                <span class="chip chip--green">{{ selectedJo().JO_No }}</span>
+                <span class="chip chip--gray">{{ selectedJo().VendorName || '—' }}</span>
+            </div>
+            <button class="btn-detail-back" (click)="clearSelection()" title="Back to list">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                Back
+            </button>
+        </div>
+
+        <div class="jo-info-strip">
+            <div class="jo-info-cell">
+                <span class="info-lbl">Document</span>
+                <span class="info-val">{{ selectedJo().JO_No }}</span>
+            </div>
+            <div class="jo-info-cell">
+                <span class="info-lbl">Doc Type</span>
+                <span class="info-val">{{ selectedJo().DocType || '—' }}</span>
+            </div>
+            <div class="jo-info-cell">
+                <span class="info-lbl">Vendor</span>
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                    <span class="info-val">{{ selectedJo().VendorName || '—' }}</span>
+                    @if (selectedJo().VendorCode) { <span class="jo-vendor-code-tag">{{ selectedJo().VendorCode }}</span> }
+                </div>
+            </div>
+            <div class="jo-info-cell">
+                <span class="info-lbl">Order Qty</span>
+                <span class="info-val info-val--highlight">{{ selectedJo().OrderQty }}</span>
+            </div>
+            <div class="jo-info-cell">
+                <span class="info-lbl">Entry Date</span>
+                <span class="info-val">{{ selectedJo().EntryDate ? (selectedJo().EntryDate | date:'dd-MMM-yyyy') : '—' }}</span>
+            </div>
+            <div class="jo-info-cell">
+                <span class="info-lbl">Updated By</span>
+                <span class="info-val">{{ selectedJo().UpdatedBy || '—' }}</span>
+            </div>
+        </div>
+
+        <div class="jo-tabs">
+            <button class="jo-tab" [class.jo-tab--active]="activeTab() === 'update'" (click)="setTab('update')">
+                Update Status
+            </button>
+            <button class="jo-tab" [class.jo-tab--active]="activeTab() === 'history'" (click)="setTab('history')">
+                Production History
+            </button>
+        </div>
+
+        <!-- ══════════ UPDATE TAB ══════════ -->
+        @if (activeTab() === 'update') {
+
+        <!-- Order detail grid reference (top of update tab) -->
+        @if (isLoadingJoLineData() || updateLineGrid()) {
+        <div class="lg-ref-wrap">
+            <div class="lg-ref-header" (click)="toggleLineGrid()">
+                <div class="lg-ref-header-left">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z"/>
+                    </svg>
+                    <span>Pending Order Detail</span>
+                    @if (updateLineGrid(); as grid) {
+                    <span class="lg-ref-badge">{{ grid.rows.length }} colours</span>
+                    <span class="lg-ref-badge lg-ref-badge--green">{{ grid.grandTotal }} pcs pending</span>
+                    }
+                </div>
+                <button class="lg-toggle-btn" (click)="toggleLineGrid(); $event.stopPropagation()">
+                    @if (showLineGrid()) { ▲ Hide } @else { ▼ Show }
+                </button>
+            </div>
+
+            @if (showLineGrid()) {
+                @if (isLoadingJoLineData()) {
+                <div class="suc-loading">
+                    <span class="jo-spinner jo-spinner--sm"></span>
+                    <span>Loading order details…</span>
+                </div>
+                } @else if (updateLineGrid()) {
+                <ng-container [ngTemplateOutlet]="lineGridTpl" [ngTemplateOutletContext]="{grid: updateLineGrid()}"></ng-container>
+                }
+            }
+        </div>
+        }
+
+        <!-- Overall Progress -->
+        <div class="jo-progress-section">
+            <div class="jo-progress-header">
+                <span>Overall Production Progress
+                    <span class="jo-prog-stage-lbl">— Packing &amp; Dispatch</span>
+                </span>
+                <span [class.text-danger]="(selectedJo().PackingDispatch || 0) > selectedJo().OrderQty">
+                    {{ selectedJo().PackingDispatch || 0 }} / {{ selectedJo().OrderQty }} pcs &nbsp;({{ progressPct() }}%)
+                </span>
+            </div>
+            <div class="jo-progress-bar">
+                <div class="jo-progress-fill"
+                    [style.width.%]="progressPct()"
+                    [class.jo-progress-fill--over]="(selectedJo().PackingDispatch || 0) > selectedJo().OrderQty">
+                </div>
+            </div>
+        </div>
+
+        <!-- Stage 1: Fabric Preparation — Total Qty -->
+        <div class="suc-stage1-wrap">
+            <div class="suc-s1-header">
+                <span class="suc-badge" style="background:#3B82F6">1</span>
+                <span class="suc-name">Fabric Preparation</span>
+                <span class="suc-type-tag">Total Qty Entry</span>
+                @if (selectedJo().FabricPreparation > 0) {
+                <span class="suc-current-val">Current: {{ selectedJo().FabricPreparation }} pcs</span>
+                }
+            </div>
+            <div class="suc-s1-body">
+                <div class="suc-s1-input-wrap">
+                    <input type="number" class="suc-qty-input" min="0"
+                        [value]="stage1Qty()"
+                        (input)="stage1Qty.set(+$any($event.target).value || 0)"
+                        placeholder="0" />
+                    <span class="suc-unit">pcs</span>
+                    <button class="btn-save-s1" [disabled]="isSavingStage1()" (click)="saveStage1Qty()">
+                        @if (isSavingStage1()) {
+                        <span class="jo-spinner jo-spinner--xs jo-spinner--white"></span>
+                        Saving…
+                        } @else {
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z"/><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z"/></svg>
+                        Save Stage 1
+                        }
+                    </button>
+                </div>
+                @if (stage1Result()) {
+                <div class="suc-s1-result"
+                    [class.suc-s1-result--ok]="stage1Result()!.status === 1"
+                    [class.suc-s1-result--err]="stage1Result()!.status !== 1">
+                    <svg viewBox="0 0 20 20" fill="currentColor" style="width:14px;height:14px;flex-shrink:0">
+                        @if (stage1Result()!.status === 1) {
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/>
+                        } @else {
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/>
+                        }
+                    </svg>
+                    {{ stage1Result()!.message }}
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="suc-divider">
+            <div class="suc-divider-line"></div>
+            <span class="suc-divider-text">Line-wise &amp; Time-wise Tracking — Stages 2–6</span>
+            <div class="suc-divider-line"></div>
+        </div>
+
+        <!-- Loading line entries -->
+        @if (isLoadingLineEntries()) {
+        <div class="suc-loading">
+            <span class="jo-spinner jo-spinner--sm"></span>
+            <span>Loading production entries…</span>
+        </div>
+        }
+
+        <!-- Stages 2–6: Line-wise cards -->
+        @if (!isLoadingLineEntries()) {
+        <div class="suc-cards-area">
+            @for (stage of lineStages; track stage.key; let idx = $index) {
+            <div class="suc-card" [style.--sc]="stageColors[idx + 1]">
+
+                <div class="suc-card-head">
+                    <div class="suc-head-left">
+                        <span class="suc-badge" [style.background]="stageColors[idx + 1]">{{ idx + 2 }}</span>
+                        <span class="suc-name">{{ stage.label }}</span>
+                        @if (prevStageQty(stage.key) > 0) {
+                        <span class="suc-limit-badge">
+                            Max {{ prevStageQty(stage.key) }} pcs
+                        </span>
+                        }
+                    </div>
+                    <div class="suc-head-right">
+                        @if (stageLineTotal(stage.key) > 0) {
+                        <span class="suc-total-chip" [style.background]="stageColors[idx + 1]">
+                            {{ stageLineTotal(stage.key) }} pcs
+                        </span>
+                        }
+                        <button class="btn-add-line-entry"
+                            [class.btn-add-line-entry--cancel]="addEntryStage() === stage.key"
+                            (click)="addEntryStage() === stage.key ? cancelAddEntry() : startAddEntry(stage.key)">
+                            @if (addEntryStage() === stage.key) {
+                            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                            Cancel
+                            } @else {
+                            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                            Add Entry
+                            }
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Inline Add Entry Form — Matrix -->
+                @if (addEntryStage() === stage.key) {
+                @if (updateLineGrid(); as egrid) {
+                <div class="suc-matrix-form" [style.--sc]="stageColors[idx + 1]">
+
+                    <!-- Top controls row -->
+                    <div class="suc-matrix-controls">
+                        <div class="suc-matrix-grand"
+                            [class.smt-grand--over]="matrixValidationError(stage.key, egrid) !== null">
+                            <span class="smt-grand-label">Total</span>
+                            <span class="smt-grand-val">{{ matrixGrandTotal(egrid) }} pcs</span>
+                            @if (prevStageQty(stage.key) > 0) {
+                            <span class="smt-capacity-hint"
+                                [class.smt-capacity-hint--over]="matrixValidationError(stage.key, egrid) !== null">
+                                max {{ stageCapacityRemaining(stage.key) }} pcs
+                            </span>
+                            }
+                        </div>
+                        <button class="btn-confirm-entry" [style.--sc]="stageColors[idx + 1]"
+                            [disabled]="isAddingEntry() || matrixGrandTotal(egrid) === 0 || matrixValidationError(stage.key, egrid) !== null"
+                            (click)="submitMatrixEntry(stage.key)">
+                            @if (isAddingEntry()) {
+                            <span class="jo-spinner jo-spinner--xs jo-spinner--white"></span>
+                            } @else {
+                            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            }
+                            Save
+                        </button>
+                    </div>
+
+                    <!-- Validation error banner -->
+                    @if (matrixValidationError(stage.key, egrid); as vErr) {
+                    <div class="smt-validation-error">
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        {{ vErr }}
+                    </div>
+                    }
+
+                    <!-- Matrix table -->
+                    <div class="suc-matrix-scroll">
+                        <table class="suc-matrix-table">
+                            <thead>
+                                <tr>
+                                    <th class="smt-th-colour">Colour</th>
+                                    @for (sz of egrid.sizes; track sz) {
+                                    <th class="smt-th-size">{{ sz }}</th>
+                                    }
+                                    <th class="smt-th-total">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of egrid.rows; track row.colour) {
+                                <tr>
+                                    <td class="smt-td-colour">
+                                        <span class="smt-swatch" [style.background]="colourSwatchBg(row.displayColour)"></span>
+                                        {{ row.displayColour }}
+                                        @if (row.slive) {
+                                        <span class="smt-slive">{{ row.slive }}</span>
+                                        }
+                                    </td>
+                                    @for (sz of egrid.sizes; track sz) {
+                                    <td class="smt-td-input">
+                                        <input class="smt-qty-input" type="number" min="0" placeholder="0"
+                                            [value]="getMatrixQty(row.colour, sz) || ''"
+                                            (input)="setMatrixQty(row.colour, sz, $any($event.target).value)" />
+                                        @if (row.sizes[sz]) {
+                                        <span class="smt-ref-qty"><b>/ {{ row.sizes[sz] }}</b></span>
+                                        }
+                                    </td>
+                                    }
+                                    <td class="smt-td-row-total">{{ matrixRowTotal(row.colour) }}</td>
+                                </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td class="smt-tf-label">Col Total</td>
+                                    @for (sz of egrid.sizes; track sz) {
+                                    <td class="smt-tf-col">{{ matrixColTotal(egrid, sz) }}</td>
+                                    }
+                                    <td class="smt-tf-grand">{{ matrixGrandTotal(egrid) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                } @else {
+                <!-- No line grid data — fallback simple form -->
+                <div class="suc-add-form suc-add-form--nogrid" [style.--sc]="stageColors[idx + 1]">
+                    <div class="suc-empty-stage">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.02M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/>
+                        </svg>
+                        No line item data found. Select a Doc Number in the entry wizard to load colour/size grid.
+                    </div>
+                </div>
+                }
+                @if (addEntryResult()) {
+                <div class="suc-add-result"
+                    [class.suc-add-result--ok]="addEntryResult()!.status === 1"
+                    [class.suc-add-result--err]="addEntryResult()!.status !== 1">
+                    {{ addEntryResult()!.message }}
+                </div>
+                }
+                }
+
+                <!-- Line Entries Table -->
+                @if (stageEntries(stage.key).length > 0) {
+                <div class="suc-table-wrap">
+                    <table class="suc-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Colour</th>
+                                <th>Sleeve</th>
+                                <th>Size</th>
+                                <th>Date</th>
+                                <th>Qty</th>
+                                <th>By</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (entry of stageEntries(stage.key); track entry.Id; let i = $index) {
+                            <tr>
+                                <td class="suc-td-num">{{ i + 1 }}</td>
+                                <td>
+                                    @if (entry.Colour) {
+                                    <span class="smt-swatch smt-swatch--sm" [style.background]="colourSwatchBg(entry.Colour)"></span>
+                                    {{ entry.Colour }}
+                                    } @else { — }
+                                </td>
+                                <td>{{ entry.Slive || '—' }}</td>
+                                <td>{{ entry.Size || '—' }}</td>
+                                <td class="suc-td-date">{{ entry.EntryDate ? (entry.EntryDate | date:'dd-MMM') : '—' }}</td>
+                                <td><span class="qty-pill qty-pill--green">{{ entry.Qty }}</span></td>
+                                <td class="suc-td-by">{{ entry.CreatedBy || '—' }}</td>
+                                <td>
+                                    <button class="btn-del-entry" (click)="removeLineEntry(entry.Id, stage.key)" title="Delete this entry">
+                                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                    </button>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="suc-tfoot-label">Stage Total</td>
+                                <td><span class="qty-pill qty-pill--green" style="font-size:13px; font-weight:800;">{{ stageLineTotal(stage.key) }}</span></td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                } @else if (addEntryStage() !== stage.key) {
+                <div class="suc-empty-stage">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" />
+                    </svg>
+                    No entries yet — click <b>Add Entry</b> to record production.
+                </div>
+                }
+
+            </div>
+            }
+        </div>
+        }
+
+        <!-- Vendor Entry Banner -->
+        @if (packingDispatchQty() > 0) {
+        <div class="ve-banner" [class.ve-banner--done]="selectedJo().VendorEntryId">
+            @if (selectedJo().VendorEntryId) {
+            <div class="ve-banner-done-wrap">
+                <div class="ve-banner-done-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+                </div>
+                <div class="ve-banner-text">
+                    <span class="ve-banner-title">Vendor Entry Created</span>
+                    <span class="ve-banner-sub">Final qty of {{ packingDispatchQty() }} pcs has been transferred to the Vendor Entry process</span>
+                </div>
+            </div>
+            } @else {
+            <div class="ve-banner-content">
+                <div class="ve-banner-pkg-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/>
+                    </svg>
+                </div>
+                <div class="ve-banner-text">
+                    <span class="ve-banner-title">Packing &amp; Dispatch Completed</span>
+                    <span class="ve-banner-sub">{{ packingDispatchQty() }} pcs are ready — create the Vendor Entry to finalize production</span>
+                </div>
+            </div>
+            <button class="btn-create-ve"
+                [disabled]="!canCreateVendorEntry()"
+                (click)="navigateToVendorEntry()">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                Create Vendor Entry
+            </button>
+            }
+        </div>
+        }
+
+        <!-- Footer -->
+        <div class="jo-form-footer suc-footer">
+            <div class="jo-footer-info">
+                @if (isOverQty()) {
+                    <span class="text-danger">Total exceeds order qty by {{ totalStageQty() - selectedJo().OrderQty }} units</span>
+                } @else if (remaining() > 0) {
+                    <span class="text-muted">{{ remaining() }} unit(s) remaining across all stages</span>
+                } @else if (totalStageQty() > 0) {
+                    <span style="color:#059669; font-weight:600;">All {{ selectedJo().OrderQty }} units tracked ✓</span>
+                } @else {
+                    <span class="text-muted">Add entries to track production progress</span>
+                }
+            </div>
+            <div class="suc-footer-note">Each stage saves independently</div>
+        </div>
+
+        }
+        <!-- end update tab -->
+
+        <!-- ══════════ HISTORY TAB ══════════ -->
+        @if (activeTab() === 'history') {
+
+        @if (isHistLoading()) {
+        <div class="jo-loader-row jo-loader-row--inner">
+            <div class="jo-spinner jo-spinner--sm"></div>
+            <span>Loading production history…</span>
+        </div>
+        }
+
+        @if (!isHistLoading() && historyRows().length === 0) {
+        <div class="jo-empty-row">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>No production history yet. Add line-wise entries from the Update Status tab.</span>
+        </div>
+        }
+
+        @if (!isHistLoading() && historyRows().length > 0) {
+        <div class="jo-table-scroll jo-hist-scroll">
+            <table class="jo-table">
+                <thead>
+                    <tr>
+                        <th class="td-num">#</th>
+                        <th>Stage</th>
+                        <th>Colour</th>
+                        <th>Sleeve</th>
+                        <th>Size</th>
+                        <th class="td-date">Date</th>
+                        <th class="td-qty">Qty</th>
+                        <th class="td-date">Recorded At</th>
+                        <th>By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (h of historyRows(); track h.Id; let i = $index) {
+                    <tr>
+                        <td class="td-num">{{ i + 1 }}</td>
+                        <td>
+                            <span class="hist-stage-pill"
+                                [style.background]="stageColorByKey(h.Stage) + '1a'"
+                                [style.color]="stageColorByKey(h.Stage)"
+                                [style.border-color]="stageColorByKey(h.Stage) + '44'">
+                                {{ stageLabel(h.Stage) }}
+                            </span>
+                        </td>
+                        <td>
+                            @if (h.Colour) {
+                            <span class="smt-swatch smt-swatch--sm" [style.background]="colourSwatchBg(h.Colour)"></span>
+                            {{ h.Colour }}
+                            } @else { — }
+                        </td>
+                        <td>{{ h.Slive || '—' }}</td>
+                        <td>{{ h.Size || '—' }}</td>
+                        <td class="td-date">{{ h.EntryDate ? (h.EntryDate | date:'dd-MMM-yyyy') : '—' }}</td>
+                        <td class="td-qty"><span class="qty-pill qty-pill--green">{{ h.Qty }}</span></td>
+                        <td class="td-date">{{ h.CreatedAt | date:'dd-MMM-yy HH:mm' }}</td>
+                        <td>{{ h.CreatedBy || '—' }}</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+
+        }
+        <!-- end history tab -->
+
+    </div>
+    }
+    <!-- end detail section -->
+
+</div>
+
+<!-- ═══════════════ REUSABLE LINE GRID TEMPLATE ═══════════════ -->
+<ng-template #lineGridTpl let-grid="grid">
+<div class="lg-wrap">
+    <div class="lg-scroll">
+        <table class="lg-table">
+            <thead>
+                <tr>
+                    <th class="lg-th-colour">Colour</th>
+                    @for (sz of grid.sizes; track sz) {
+                    <th class="lg-th-size">{{ sz }}</th>
+                    }
+                    <th class="lg-th-total">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (row of grid.rows; track row.colour) {
+                <tr class="lg-row">
+                    <td class="lg-td-colour">
+                        <div class="lg-colour-cell">
+                            <span class="lg-swatch" [style.background]="colourSwatchBg(row.displayColour)"></span>
+                            <div class="lg-colour-label-wrap">
+                                <span class="lg-colour-label">{{ row.displayColour }}</span>
+                                @if (row.slive) {
+                                <span class="lg-slive-label">{{ row.slive }}</span>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                    @for (sz of grid.sizes; track sz) {
+                    <td class="lg-td-qty"
+                        [class.lg-td-qty--has]="row.sizes[sz]"
+                        [class.lg-td-qty--zero]="!row.sizes[sz]">
+                        @if (row.sizes[sz]) {
+                            <span class="lg-qty">{{ row.sizes[sz] }}</span>
+                        } @else {
+                            <span class="lg-dash">—</span>
+                        }
+                    </td>
+                    }
+                    <td class="lg-td-row-total">
+                        <span class="lg-row-total">{{ row.total }}</span>
+                    </td>
+                </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr class="lg-foot-row">
+                    <td class="lg-td-colour">
+                        <span class="lg-foot-lbl">Col Total</span>
+                    </td>
+                    @for (sz of grid.sizes; track sz) {
+                    <td class="lg-td-qty lg-td-col-total">
+                        <b>{{ colSizeTotal(grid, sz) }}</b>
+                    </td>
+                    }
+                    <td class="lg-td-row-total">
+                        <b class="lg-grand-total">{{ grid.grandTotal }}</b>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+</ng-template>

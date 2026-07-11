@@ -4,6 +4,7 @@ import { AuthService } from '../../services/auth.service';
 import { interval, Subscription } from 'rxjs';
 import { DocType, LineItem, EntryStatus, MaterialEntry } from '../../models/material-entry.model';
 import { CommonModule } from '@angular/common';
+import { JoVendorNavigationService } from '../../services/jo-vendor-navigation.service';
 
 declare const Swal: any;
 declare var QrCreator: any;
@@ -18,8 +19,9 @@ declare var QrCreator: any;
 })
 export class VendorEntryComponent {
 
-    private api = inject(MaterialEntryService);
-    private auth = inject(AuthService);
+    private api          = inject(MaterialEntryService);
+    private auth         = inject(AuthService);
+    private joVendorNav  = inject(JoVendorNavigationService);
 
     refreshVendor!: Subscription;
 
@@ -176,12 +178,45 @@ export class VendorEntryComponent {
         this.filterToDate = now.toISOString().slice(0, 10);
         this.applySearchDate();
 
-        // 🔁 Auto refresh every 30 sec
         this.refreshVendor = interval(30000).subscribe(() => {
             this.applySearchDate();
         });
 
-        this.getWarehouses()
+        this.getWarehouses();
+
+        // Pre-fill from JO Status navigation if a payload is waiting
+        const payload = this.joVendorNav.consumePayload();
+        if (payload) {
+            this.prefillFromJo(payload);
+        }
+    }
+
+    private async prefillFromJo(payload: import('../../services/jo-vendor-navigation.service').JoVendorPayload): Promise<void> {
+        this.resetForm(true);
+        this.mode.set('form');
+
+        this.partyCode.set(payload.partyCode);
+        this.partyName.set(payload.partyName);
+        this.docType.set(payload.docType as DocType);
+
+        await this.loadDocumentsForParty();
+
+        if (this.docNumbers().includes(payload.docNumber)) {
+            this.selectDocNumber(payload.docNumber);
+
+            if (payload.packingEntries.length > 0) {
+                this.lineItems.update(items =>
+                    items.map(item => {
+                        const match = payload.packingEntries.find(
+                            e => e.colour === item.ItemColor &&
+                                 e.size   === item.ItemSize  &&
+                                 e.slive  === item.ItemSlive
+                        );
+                        return match ? { ...item, dispatchQty: match.qty } : item;
+                    })
+                );
+            }
+        }
     }
 
     ngOnDestroy(): void {

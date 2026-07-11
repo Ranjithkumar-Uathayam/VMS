@@ -5,6 +5,7 @@ const materialEntriesRouter = require('./api/material-entries');
 const authRouter = require('./api/auth');
 const partyBin = require('./api/partyBinMaster');
 const grnPushing = require('./api/grnPushing');
+const joStatus   = require('./api/joStatus');
 const db = require('./db');
 const { getWmsPool } = require('./db-wms');
 
@@ -17,7 +18,8 @@ app.use(express.json());
 app.use('/api/auth', authRouter);
 app.use('/api/material-transactions', materialEntriesRouter);
 app.use('/api/partyBin', partyBin);
-app.use('/api/ERP', grnPushing);
+app.use('/api/ERP',      grnPushing);
+app.use('/api/joStatus', joStatus);
 
 // Start the server and then attempt to connect to both databases.
 app.listen(port, () => {
